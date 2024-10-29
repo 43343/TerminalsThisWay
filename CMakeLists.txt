@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(TerminalsThisWay VERSION 1.0.0 LANGUAGES CXX)
+project(TerminalsThisWay VERSION 0.0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -16,6 +16,11 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:IA32")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MACHINE:X86")
 endif()
+
+configure_file(
+     "src/version.h.in"
+     "../src/version.h"
+   )
 
 set(Sources
     src/main.cpp
@@ -37,10 +42,16 @@ set(Sources
     src/win/Window/GUI/text.h
     src/win/Window/GUI/button.cpp
     src/win/Window/GUI/button.h
+    src/win/Window/GUI/image.cpp
+    src/win/Window/GUI/image.h
     src/win/Window/localization.cpp
     src/win/Window/localization.h
     src/win/Window/parameterInputWindow.cpp
     src/win/Window/parameterInputWindow.h
+    src/win/Window/about.cpp
+    src/win/Window/about.h
+    src/win/Window/modalWindow.cpp
+    src/win/Window/modalWindow.h
     src/win/updater.cpp
     src/win/updater.h
     src/win/Config/config.h
@@ -54,11 +65,14 @@ set(Sources
     src/win/chooseFolder.h
     src/win/terminal.cpp
     src/win/terminal.h
+    src/version.h
 )
 
 if(WIN32)
     list(APPEND Sources ${APP_ICON_RESOURCE_WINDOWS})
     add_executable(TerminalsThisWay ${Sources})
+    target_link_libraries(TerminalsThisWay PRIVATE wininet)
+    include(CPack)
 endif()
 
 install(TARGETS TerminalsThisWay)
