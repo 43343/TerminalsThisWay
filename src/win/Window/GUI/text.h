@@ -14,9 +14,16 @@ namespace GUI {
 
         void setColor(const std::string& hex);
         void setText(const std::string& text);
+        void setStyle(bool bold, bool italic);
+        void setFontSize(int fontSize);
     private:
         HINSTANCE hInstance;
         HWND parentHwnd;
         HWND hwnd;
+        HFONT hFont;
+        bool bold;
+        bool italic;
+        int fontSize;
+        void setFont();
     };
 }

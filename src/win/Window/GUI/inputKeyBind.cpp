@@ -1,16 +1,17 @@
 ﻿#include "inputKeyBind.h"
 #include <iostream>
 #include <tchar.h>
+#include "../../Utility/utility.h"
 
 namespace GUI {
 	InputKeyBind::InputKeyBind(HINSTANCE hInstance, HWND parentHwnd, int x, int y, int width, int height) : parentHwnd(parentHwnd) {
 
-		HWND hwnd = CreateWindowExW(
-			0, L"EDIT",   
+		hwnd = CreateWindowExW(
+			0, L"EDIT",
 			L"",
 			WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | ES_READONLY,
 			x, y, width, height,
-			parentHwnd, NULL, hInstance, NULL);
+			parentHwnd, nullptr, hInstance, nullptr);
 		SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 		originalWndProc = (WNDPROC)SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)WindowProc);
 	}
@@ -50,59 +51,67 @@ namespace GUI {
 		}
 		*p2 = L'\0'; // Null-terminate the modified string
 	}
-	void InputKeyBind::GetEnglishKeyNameText(WPARAM wParam, char* keyName, int keyNameSize)
+	void InputKeyBind::GetEnglishKeyNameText(WPARAM wParam, LPARAM lParam, char* keyName, int keyNameSize)
 	{
-		UINT virtualKey = static_cast<UINT>(wParam);
-		HKL englishLayout = LoadKeyboardLayout(_T("00000409"), KLF_ACTIVATE);
-		UINT scanCode = MapVirtualKeyEx(virtualKey, MAPVK_VK_TO_VSC, englishLayout);
+		DWORD vkCode = static_cast<DWORD>(wParam);
+		if (vkCode == VK_SHIFT) {
+			bool isLeftShift = GetAsyncKeyState(VK_LSHIFT) & 0x8000;
+			bool isRightShift = GetAsyncKeyState(VK_RSHIFT) & 0x8000;
 
-		// Обработка специальных клавиш
-		if (virtualKey == VK_NUMLOCK) {
-			_tcscpy_s(keyName, keyNameSize, _T("NumLock"));
-		}
-		else if (virtualKey == VK_PAUSE) {
-			_tcscpy_s(keyName, keyNameSize, _T("Pause"));
-		}
-		else if (virtualKey == VK_INSERT) {
-			_tcscpy_s(keyName, keyNameSize, _T("Insert"));
-		}
-		else if (virtualKey == VK_HOME) {
-			_tcscpy_s(keyName, keyNameSize, _T("Home"));
-		}
-		else if (virtualKey == VK_PRIOR) {
-			_tcscpy_s(keyName, keyNameSize, _T("PageUp"));
-		}
-		else if (virtualKey == VK_DELETE) {
-			_tcscpy_s(keyName, keyNameSize, _T("Delete"));
-		}
-		else if (virtualKey == VK_END) {
-			_tcscpy_s(keyName, keyNameSize, _T("End"));
-		}
-		else if (virtualKey == VK_NEXT) {
-			_tcscpy_s(keyName, keyNameSize, _T("PageDown"));
-		}
-		else {
-			// Общая обработка для остальных клавиш
-			LPARAM englishLParam = (scanCode << 16);
-			if (GetKeyNameText(englishLParam, keyName, keyNameSize) == 0) {
-				_tcscpy_s(keyName, keyNameSize, _T("Unknown"));
+			if (isLeftShift && !isRightShift) {
+				vkCode = VK_LSHIFT;
+			}
+			else if (!isLeftShift && isRightShift) {
+				vkCode = VK_RSHIFT;
 			}
 		}
-		UnloadKeyboardLayout(englishLayout);
+		if (vkCode == VK_CONTROL) {
+			bool isLeftCtrl = GetAsyncKeyState(VK_LCONTROL) & 0x8000;
+			bool isRightCtrl = GetAsyncKeyState(VK_RCONTROL) & 0x8000;
+
+			if (isLeftCtrl && !isRightCtrl) {
+				vkCode = VK_LCONTROL;
+			}
+			else if (!isLeftCtrl && isRightCtrl) {
+				vkCode = VK_RCONTROL;
+			}
+		}
+		if (vkCode == VK_MENU) {
+			bool isLeftMenu = GetAsyncKeyState(VK_LMENU) & 0x8000;
+			bool isRightMenu = GetAsyncKeyState(VK_RMENU) & 0x8000;
+
+			if (isLeftMenu && !isRightMenu) {
+				vkCode = VK_LMENU;
+			}
+			else if (!isLeftMenu && isRightMenu) {
+				vkCode = VK_RMENU;
+			}
+		}
+		std::string hKey = keyToString(vkCode);
+		printf("Key Pressed: 0x%02Xn", vkCode);
+		if (hKey != "") {
+			strncpy_s(keyName, keyNameSize, hKey.c_str(), _TRUNCATE);
+		}
+		else {
+			// Если клавиша не найдена в таблице сопоставления
+			_snprintf_s(keyName, keyNameSize, _TRUNCATE, "Unknown (0x%02X)", vkCode);
+		}
 	}
 	LRESULT CALLBACK InputKeyBind::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		InputKeyBind* keyBind = reinterpret_cast<InputKeyBind*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+
 		static int btnCount = 0;
-		switch (msg) {
-		case WM_KEYDOWN:
-			
+
+		DWORD vkCode = static_cast<DWORD>(wParam);
+		if (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN)
+		{
 			if (btnCount == 0) keyBind->keySequence.clear();
 			SetWindowText(hwnd, "");
 			InvalidateRect(keyBind->parentHwnd, NULL, TRUE);
 			UpdateWindow(keyBind->parentHwnd);
 			if (btnCount == 1) keyBind->keySequence += " + ";
 			char keyName[32];
-			keyBind->GetEnglishKeyNameText(wParam, keyName, sizeof(keyName) / sizeof(wchar_t));
+			keyBind->GetEnglishKeyNameText(wParam, lParam, keyName, sizeof(keyName) / sizeof(wchar_t));
 			keyBind->RemoveSpaces(keyName);
 			keyBind->keySequence += keyName;
 			std::cout << keyBind;
@@ -110,8 +119,13 @@ namespace GUI {
 			SetWindowText(hwnd, keyBind->keySequence.c_str());
 			btnCount++;
 			if (btnCount == 2) SetFocus(NULL);
-			break;
-		case WM_LBUTTONUP:
+			if (wParam == VK_MENU)
+			{
+				return 0;
+			}
+		}
+		if (msg == WM_LBUTTONUP)
+		{
 			SetWindowText(hwnd, "");
 			InvalidateRect(keyBind->parentHwnd, NULL, TRUE);
 			UpdateWindow(keyBind->parentHwnd);
@@ -119,8 +133,6 @@ namespace GUI {
 			std::cout << "LBUTTON";
 			SetWindowText(hwnd, "Нажмите клавишу");
 			btnCount = 0;
-			//SetFocus(NULL);
-			break;
 		}
 		return CallWindowProc(keyBind->originalWndProc, hwnd, msg, wParam, lParam);
 	}

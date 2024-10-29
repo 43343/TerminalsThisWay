@@ -1,0 +1,3 @@
+#pragma once
+
+const std::string currentVersion = "@PROJECT_VERSION@";

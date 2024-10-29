@@ -12,10 +12,12 @@ namespace GUI {
 
         void setCallback(std::function<void()> cb);
         void setText(const std::string& text);
+        void setFontSize(int fontSize);
     private:
         HINSTANCE hInstance;
         HWND parentHwnd;
         HWND hwnd;
+        HFONT hFont;
         std::function<void()> callback;
         WNDPROC originalProc;
         static LRESULT CALLBACK ButtonProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);

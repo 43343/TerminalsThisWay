@@ -9,14 +9,15 @@
 class UIAutomation
 {
 public:
-	UIAutomation(Terminal* cmd);
+	explicit UIAutomation(Terminal* cmd);
+	UIAutomation();
 	~UIAutomation();
 	std::string getSelectedText();
 private:
 	HHOOK hHook;
 	static LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
 	//UIAutomation* g_UIAutomationInstance = nullptr;
-	Terminal& hTerminal;
+	Terminal* hTerminal;
 	bool keyA_pressed = false;
 	bool keyB_pressed = false;
 	bool firstPressDetected = false;

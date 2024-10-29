@@ -9,7 +9,8 @@
 #define ID_TRAY_RESTART_ADMIN 1001
 #define ID_TRAY_UPDATE 1002
 #define ID_TRAY_SETTINGS 1003
-#define ID_TRAY_EXIT 1004
+#define ID_TRAY_ABOUT 1004
+#define ID_TRAY_EXIT 1005
 
 class TrayWindow {
 public:

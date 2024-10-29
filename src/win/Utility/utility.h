@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <string>
 
-int stringTokey(const std::string& key);
+DWORD stringTokey(const std::string& key);
 bool runAsAdministrator();
 bool isRunningAsAdministrator();
+std::string keyToString(DWORD keyCode);

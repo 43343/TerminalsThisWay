@@ -7,7 +7,7 @@
 class ParameterInputWindow
 {
 public:
-	ParameterInputWindow(Terminal* cmd, HINSTANCE instance, UIAutomation* uiAutomation);
+	ParameterInputWindow(Terminal* cmd, HINSTANCE instance, UIAutomation& uiAutomation);
 	~ParameterInputWindow();
 private:
 	HHOOK hHook;
@@ -23,4 +23,5 @@ private:
 	bool keyB_pressed = false;
 	bool firstPressDetected = false;
 	void CreateInputWindow();
+	WNDPROC originalWndProc;
 };

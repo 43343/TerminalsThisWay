@@ -26,25 +26,25 @@ Localization::Localization(std::string lang)
 	}
 	if (lang == "Russian")
 	{
-		langMap["settings"] = "Настройки";
-		langMap["general"] = "Основное";
-		langMap["pathToTerminal"] = "Путь к терминалу:";
-		langMap["localization"] = "Локализация:";
-		langMap["launchByDefault"] = "Запуск по умолчанию:";
-		langMap["runAsAdministrator"] = "Запуск от имени администратора:";
-		langMap["keyAssignment"] = "Назначение клавиш";
-		langMap["sendCommand"] = "Отправить комманду:";
-		langMap["sendCommandParameter"] = "Отправить комманду (Изменение параметра):";
-		langMap["chooseFolder"] = "Выбрать папку:";
-		langMap["warning"] = "Для применения настроек нужно закрыть текущий процесс терминала";
-		langMap["save"] = "Сохранить";
-		langMap["cancel"] = "Отмена";
-		langMap["restartAsAnAdministrator"] = "Перезапустить от имени администратора";
-		langMap["updateConfiguration"] = "Обновить конфигурацию";
-		langMap["changeConfiguration"] = "Изменить конфигурацию";
-		langMap["exit"] = "Выход";
-		langMap["applicationAlreadyRunning"] = "Приложение уже запущено.";
-		langMap["applicationAlreadyRunningDescription"] = "Другой экземпляр приложения уже запущен.";
+		langMap["settings"] = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ";
+		langMap["general"] = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ";
+		langMap["pathToTerminal"] = "пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:";
+		langMap["localization"] = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:";
+		langMap["launchByDefault"] = "пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:";
+		langMap["runAsAdministrator"] = "пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:";
+		langMap["keyAssignment"] = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ";
+		langMap["sendCommand"] = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:";
+		langMap["sendCommandParameter"] = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ):";
+		langMap["chooseFolder"] = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ:";
+		langMap["warning"] = "пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ";
+		langMap["save"] = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ";
+		langMap["cancel"] = "пїЅпїЅпїЅпїЅпїЅпїЅ";
+		langMap["restartAsAnAdministrator"] = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ";
+		langMap["updateConfiguration"] = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ";
+		langMap["changeConfiguration"] = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ";
+		langMap["exit"] = "пїЅпїЅпїЅпїЅпїЅ";
+		langMap["applicationAlreadyRunning"] = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.";
+		langMap["applicationAlreadyRunningDescription"] = "пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ.";
 	}
 }
 

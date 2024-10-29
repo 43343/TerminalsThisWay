@@ -17,7 +17,7 @@ namespace GUI {
 		HWND parentHwnd;
 		std::string keySequence;
 		void RemoveSpaces(char* str);
-		void GetEnglishKeyNameText(WPARAM wParam, char* keyName, int keyNameSize);
+		void GetEnglishKeyNameText(WPARAM wParam, LPARAM lParam, char* keyName, int keyNameSize);
 
 		static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 		WNDPROC originalWndProc;
