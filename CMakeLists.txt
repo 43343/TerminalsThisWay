@@ -71,7 +71,8 @@ set(SourcesLinux
 src/main.cpp
 src/application.h
 src/version.h
-src/linux/application.cpp)
+src/linux/application.cpp
+)
 
 if(LINUX)
   find_package(X11)
@@ -80,7 +81,7 @@ if(LINUX)
   target_include_directories(TerminalsThisWay PRIVATE ${X11_INCLUDE_DIR})
 endif()
 if(WIN32)
-    list(APPEND Sources ${APP_ICON_RESOURCE_WINDOWS})
+    list(APPEND SourcesWin ${APP_ICON_RESOURCE_WINDOWS})
     add_executable(TerminalsThisWay ${SourcesWin})
     target_link_libraries(TerminalsThisWay PRIVATE wininet)
     include(CPack)

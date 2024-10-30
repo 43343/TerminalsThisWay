@@ -75,6 +75,10 @@ Application::Application() {
 
 	std::wcout << "Даун";
 }
+Application::~Application()
+{
+
+}
 
 int Application::Run() {
 	MSG msg;
