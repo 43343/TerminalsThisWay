@@ -2,7 +2,6 @@
 #include <cstring>
 #include <shellapi.h>
 #include "../Config/configManager.h"
-#include "localization.h"
 #include "../Utility/utility.h"
 #include "about.h"
 
@@ -68,7 +67,6 @@ LRESULT CALLBACK TrayWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 				hIcon = sii.hIcon;
 			}
 
-			Localization* local = new Localization(ConfigManager::getInstance().getConfig().language);
 			/*LPSTR s = const_cast<char*>(local->getText("restartAsAnAdministrator").c_str());
 			MENUITEMINFO mii = { sizeof(MENUITEMINFO) };
 			mii.fMask = MIIM_STRING | MIIM_ID | MIIM_BITMAP;
@@ -78,30 +76,29 @@ LRESULT CALLBACK TrayWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 			ICONINFO iconInfo;
 			if (GetIconInfo(hIcon, &iconInfo))
 			{
-				hBitmap = iconInfo.hbmColor; // Используем цветовую часть иконки
-				//DeleteObject(iconInfo.hbmMask); // Удаляем маску, если она не нужна
+				hBitmap = iconInfo.hbmColor; // We use the color part of the icon
+				//DeleteObject(iconInfo.hbmMask); // We remove the mask if it is not needed
 			}
 			if (hBitmap)
 			{
-				mii.hbmpItem = hBitmap; // Устанавливаем HBITMAP в элемент меню
+				mii.hbmpItem = hBitmap; // Installing HBITMAP in the menu item
 
-				// Добавьте элемент меню в меню
+				// Add a menu item to the menu
 				InsertMenuItem(hMenu, 0, TRUE, &mii);
 
-				// Освободите HBITMAP, если он больше не нужен
+				// Release the HBITMAP if it is no longer needed
 				//DeleteObject(hBitmap);
 			}
 
-			// Освободите иконку после использования
+			// Release the icon after use
 			//DestroyIcon(hIcon);*/
-			AppendMenu(hMenu, MF_STRING, ID_TRAY_RESTART_ADMIN, local->getText("restartAsAnAdministrator").c_str());
+			AppendMenu(hMenu, MF_STRING, ID_TRAY_RESTART_ADMIN, "Restart as an administrator");
 			if (isRunningAsAdministrator())
 				EnableMenuItem(hMenu, ID_TRAY_RESTART_ADMIN, MF_BYCOMMAND | MF_GRAYED);
-			AppendMenu(hMenu, MF_STRING, ID_TRAY_UPDATE, local->getText("updateConfiguration").c_str());
-			AppendMenu(hMenu, MF_STRING, ID_TRAY_SETTINGS, local->getText("changeConfiguration").c_str());
-			AppendMenu(hMenu, MF_STRING, ID_TRAY_ABOUT, local->getText("changeConfiguration").c_str());
-			AppendMenu(hMenu, MF_STRING, ID_TRAY_EXIT, local->getText("exit").c_str());
-			delete local;
+			AppendMenu(hMenu, MF_STRING, ID_TRAY_UPDATE, "Update configuration");
+			AppendMenu(hMenu, MF_STRING, ID_TRAY_SETTINGS, "Change configuration");
+			AppendMenu(hMenu, MF_STRING, ID_TRAY_ABOUT, "About");
+			AppendMenu(hMenu, MF_STRING, ID_TRAY_EXIT, "Exit");
 
 			SetForegroundWindow(hwnd);
 			TrackPopupMenu(hMenu, TPM_BOTTOMALIGN | TPM_LEFTALIGN, pt.x, pt.y, 0, hwnd, NULL);
@@ -123,7 +120,6 @@ LRESULT CALLBACK TrayWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 			ConfigManager::getInstance().loadFromFile("config.conf");
 			if (settingsWindow)
 			{
-				settingsWindow->setText();
 				settingsWindow->setInput();
 			}
 			break;

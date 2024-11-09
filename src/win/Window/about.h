@@ -2,6 +2,7 @@
 #include "GUI/image.h"
 #include "GUI/text.h"
 #include "GUI/button.h"
+#include "../updater.h"
 
 class About
 {
@@ -19,4 +20,5 @@ private:
 	GUI::Text* text1;
 	GUI::Button* btnOk;
 	GUI::Button* btnCheckUpdate;
+	Updater* updater;
 };

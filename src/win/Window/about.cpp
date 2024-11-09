@@ -1,5 +1,4 @@
 #include "about.h"
-#include "../updater.h"
 #include "../../version.h"
 
 About::About(HINSTANCE hInstance) : hInstance(hInstance)
@@ -30,7 +29,7 @@ bool About::createWindow()
 	hwnd = CreateWindowEx(
 		0,
 		CLASS_NAME,
-		"О программе",
+		"About",
 		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU,
 		CW_USEDEFAULT, CW_USEDEFAULT, 430, 145,
 		nullptr,
@@ -54,8 +53,9 @@ bool About::createWindow()
 	btnCheckUpdate = new GUI::Button(hInstance, hwnd, 260, 60, 140, 35);
 	btnCheckUpdate->setFontSize(8);
 	setText();
+	updater = new Updater();
 	btnCheckUpdate->setCallback([&]() {
-		Updater update(hInstance);
+		updater->checkUpdate();
 		});
 	ShowWindow(hwnd, SW_SHOW);
 	return true;
@@ -63,9 +63,9 @@ bool About::createWindow()
 
 void About::setText()
 {
-	text1->setText("TerminalsThisWay  " + currentVersion + " Alpha\n © 2024 Терминатор");
-	btnOk->setText("ОК");
-	btnCheckUpdate->setText("Проверить обновления");
+	text1->setText("TerminalsThisWay  " + currentVersion + " Alpha\n © 2024 43343");
+	btnOk->setText("OK");
+	btnCheckUpdate->setText("Check for updates");
 }
 
 LRESULT CALLBACK About::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {

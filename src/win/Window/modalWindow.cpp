@@ -1,6 +1,7 @@
 #include "modalWindow.h"
+#include <iostream>
 
-ModalWindow::ModalWindow(HINSTANCE hInstance) : hInstance(hInstance)
+ModalWindow::ModalWindow()
 {
 
 }
@@ -11,9 +12,13 @@ ModalWindow::~ModalWindow()
 }
 
 
-void ModalWindow::createWindow(const std::string& currentVersion, const std::string& latestVersion, std::function<void()> cb)
+bool ModalWindow::createWindow(const std::string& currentVersion, const std::string& latestVersion)
 {
 	const char CLASS_NAME[] = "UpdateWindowClass";
+
+	bool output = false;
+
+	HINSTANCE hInstance = GetModuleHandle(NULL);
 
 	WNDCLASS wc = {};
 	wc.lpfnWndProc = ModalWndProc;
@@ -21,14 +26,14 @@ void ModalWindow::createWindow(const std::string& currentVersion, const std::str
 	wc.lpszClassName = CLASS_NAME;
 	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	wc.hIcon = LoadIcon((HINSTANCE)GetModuleHandle(NULL), "IDI_ICON1");
+	wc.hIcon = LoadIcon(hInstance, "IDI_ICON1");
 
 	RegisterClass(&wc);
 
 	hwnd = CreateWindowEx(
 		0,
 		CLASS_NAME,
-		"Доступно обновление",
+		"Update is available!",
 		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU,
 		CW_USEDEFAULT, CW_USEDEFAULT, 430, 250,
 		nullptr,
@@ -41,14 +46,27 @@ void ModalWindow::createWindow(const std::string& currentVersion, const std::str
 	text->setFontSize(10);
 	text->setText("A new version TerminalThisWay is available!\n\nCurrent Version: " + currentVersion + "\nLatest Version: " + latestVersion + "\n\nDo you want to update?");
 	btnYes = new GUI::Button(hInstance, hwnd, 100, 150, 140, 35);
+	btnYes->setCallback([&]()
+		{
+			output = true;
+			PostMessage(hwnd, WM_CLOSE, 0, 0);
+		});
 	btnYes->setText("Да");
-	btnYes->setCallback(cb);
 	btnNo = new GUI::Button(hInstance, hwnd, 260, 150, 140, 35);
 	btnNo->setText("Нет"); 
 	btnNo->setCallback([&]() {
-		ShowWindow(hwnd, SW_HIDE);
+		PostMessage(hwnd, WM_CLOSE, 0, 0);
 		});
 	ShowWindow(hwnd, SW_SHOW);
+	MSG msg;
+	while (GetMessage(&msg, nullptr, 0, 0)) {
+		if (!IsDialogMessage(hwnd, &msg)) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+	}
+
+	return output;
 }
 
 LRESULT CALLBACK ModalWindow::ModalWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -56,6 +74,14 @@ LRESULT CALLBACK ModalWindow::ModalWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, 
 
 	switch (uMsg)
 	{
+	case WM_COMMAND:
+		break;
+	case WM_CLOSE:
+		DestroyWindow(hwnd);
+		break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		break;
 	case WM_CTLCOLORSTATIC:
 		HDC hdcStatic = (HDC)wParam;
 		SetBkMode(hdcStatic, TRANSPARENT);

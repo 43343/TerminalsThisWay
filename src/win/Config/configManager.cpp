@@ -23,7 +23,6 @@ void ConfigManager::generateConfigFile(const std::string& filePath)
 	std::ofstream outfile(filePath);
 	if (outfile.is_open()) {
 		outfile << "PathToTerminal=C:\\Program Files\\PowerShell\\7\\pwsh.exe\n";
-		outfile << "Language=English\n";
 		outfile << "LaunchByDefault=0\n";
 		outfile << "RunAsAdministrator=0\n";
 		outfile << "SendCommand=Insert\n";
@@ -41,7 +40,6 @@ void ConfigManager::overwritingConfig(const std::string& filePath, const Config&
 	std::ofstream outfile(filePath);
 	if (outfile.is_open()) {
 		outfile << "PathToTerminal=" + currentConfig.pathToTerminal + "\n";
-		outfile << "Language=" + currentConfig.language + "\n";
 		outfile << "LaunchByDefault=" + std::to_string(currentConfig.launchByDefault) + "\n";
 		outfile << "RunAsAdministrator=" + std::to_string(currentConfig.runAsAdministrator) + "\n";
 		outfile << "SendCommand=" + currentConfig.sendCommand + "\n";
@@ -124,7 +122,6 @@ bool ConfigManager::loadFromFile(const std::string& filePath)
 	infile.close();
 
 	config.pathToTerminal = configMap["PathToTerminal"];
-	config.language = configMap["Language"];
 	config.launchByDefault = std::stoi(configMap["LaunchByDefault"]);
 	config.runAsAdministrator = std::stoi(configMap["RunAsAdministrator"]);
 	config.sendCommand = configMap["SendCommand"];

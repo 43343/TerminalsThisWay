@@ -1,7 +1,6 @@
 ﻿#include "chooseFolder.h"
 #include <iostream>
 #include <shlobj.h>
-#include "Window/localization.h"
 #include "Config/configManager.h"
 ChooseFolder* g_ChooseFolderInstance = nullptr;
 auto firstPressTimeChooseFolder = std::chrono::steady_clock::now();
@@ -22,8 +21,7 @@ std::string ChooseFolder::SelectFolder()
 	isDialogOpen = true; 
 
 	BROWSEINFO bi = { 0 };
-	Localization* local = new Localization(ConfigManager::getInstance().getConfig().language);
-	std::string title = local->getText("chooseFolder");
+	std::string title = "Select folder";
 	bi.lpszTitle = title.c_str();
 	bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE; 
 

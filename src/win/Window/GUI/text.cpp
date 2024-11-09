@@ -75,7 +75,7 @@ namespace GUI {
 
 		hFont = CreateFont(
 			height, 0, 0, 0,
-			weight, // или используйте текущие параметры bold/italic
+			weight, // or use the current bold/italic options
 			italic ? TRUE : FALSE, FALSE, FALSE,
 			DEFAULT_CHARSET,
 			OUT_OUTLINE_PRECIS,
@@ -86,6 +86,6 @@ namespace GUI {
 		);
 
 		SendMessage(hwnd, WM_SETFONT, (WPARAM)hFont, TRUE);
-		InvalidateRect(hwnd, nullptr, TRUE); // Обновление окна
+		InvalidateRect(hwnd, nullptr, TRUE); // Updating the window
 	}
 }

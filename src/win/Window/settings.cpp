@@ -1,7 +1,6 @@
 ﻿#include "settings.h"
 #include <iostream>
 #include "../Config/configManager.h"
-#include "localization.h"
 
 Settings::Settings(HINSTANCE hInstance) :
 	hInstance(hInstance) {}
@@ -11,8 +10,6 @@ Settings::~Settings()
 	delete generalText;
 	delete pathToTerminalInput;
 	delete pathToTerminalText;
-	delete localizationText;
-	delete localizationDropdown;
 	delete launchByDefaultText;
 	delete runAsAdministratorText;
 	delete keyAssignmentText;
@@ -43,9 +40,9 @@ bool Settings::createWindow() {
 	hwnd = CreateWindowEx(
 		0,
 		CLASS_NAME,
-		"Настройки",
+		"Settings",
 		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU,
-		CW_USEDEFAULT, CW_USEDEFAULT, 580, 380,
+		CW_USEDEFAULT, CW_USEDEFAULT, 580, 350,
 		nullptr,
 		nullptr,
 		hInstance,
@@ -68,41 +65,35 @@ bool Settings::createWindow() {
 		});
 	pathToTerminalText = new GUI::Text(hInstance, hwnd, 10, 60, 230, 20);
 
-	localizationText = new GUI::Text(hInstance, hwnd, 10, 90, 230, 20);
-	localizationDropdown = new GUI::Dropdown(hInstance, hwnd, 325, 90, 230, 100);
-	localizationDropdown->addItem(L"English");
-	localizationDropdown->addItem(L"Russian");
 
+	launchByDefaultText = new GUI::Text(hInstance, hwnd, 10, 90, 230, 20);
+	launchByDefaultToggle = new GUI::Toggle(hInstance, hwnd, 325, 90, 20, 20);
 
-	launchByDefaultText = new GUI::Text(hInstance, hwnd, 10, 120, 230, 20);
-	launchByDefaultToggle = new GUI::Toggle(hInstance, hwnd, 325, 120, 20, 20);
+	runAsAdministratorText = new GUI::Text(hInstance, hwnd, 10, 120, 230, 20);
+	runAsAdministratorToggle = new GUI::Toggle(hInstance, hwnd, 325, 120, 20, 20);
 
-	runAsAdministratorText = new GUI::Text(hInstance, hwnd, 10, 150, 230, 20);
-	runAsAdministratorToggle = new GUI::Toggle(hInstance, hwnd, 325, 150, 20, 20);
+	keyAssignmentText = new GUI::Text(hInstance, hwnd, 10, 150, 230, 20);
 
-	keyAssignmentText = new GUI::Text(hInstance, hwnd, 10, 180, 230, 20);
+	sendCommandText = new GUI::Text(hInstance, hwnd, 10, 180, 230, 20);
+	sendCommandInput = new GUI::InputKeyBind(hInstance, hwnd, 325, 180, 230, 20);
 
-	sendCommandText = new GUI::Text(hInstance, hwnd, 10, 210, 230, 20);
-	sendCommandInput = new GUI::InputKeyBind(hInstance, hwnd, 325, 210, 230, 20);
+	sendCommandParameterText = new GUI::Text(hInstance, hwnd, 10, 210, 320, 20);
+	sendCommandParameterInput = new GUI::InputKeyBind(hInstance, hwnd, 325, 210, 230, 20);
 
-	sendCommandParameterText = new GUI::Text(hInstance, hwnd, 10, 240, 320, 20);
-	sendCommandParameterInput = new GUI::InputKeyBind(hInstance, hwnd, 325, 240, 230, 20);
+	chooseFolderText = new GUI::Text(hInstance, hwnd, 10, 240, 230, 20);
+	chooseFolderInput = new GUI::InputKeyBind(hInstance, hwnd, 325, 240, 230, 20);
 
-	chooseFolderText = new GUI::Text(hInstance, hwnd, 10, 270, 230, 20);
-	chooseFolderInput = new GUI::InputKeyBind(hInstance, hwnd, 325, 270, 230, 20);
-
-	warningText = new GUI::Text(hInstance, hwnd, 10, 300, 500, 20);
+	warningText = new GUI::Text(hInstance, hwnd, 10, 270, 500, 20);
 	//warningText->setColor("FF0000");
 	warningText->setVisible(false);
 
-	saveBtn = new GUI::Button(hInstance, hwnd, 190, 320, 180, 20);
+	saveBtn = new GUI::Button(hInstance, hwnd, 190, 290, 180, 20);
 	saveBtn->setCallback([&]() {
 		ShowWindow(hwnd, SW_HIDE);
 		Config config;
 		config.sendCommand = sendCommandInput->getText();
 		config.sendCommandParameter = sendCommandParameterInput->getText();
 		config.chooseFolder = chooseFolderInput->getText();
-		config.language = localizationDropdown->getValue();
 		config.launchByDefault = launchByDefaultToggle->getState();
 		config.runAsAdministrator = runAsAdministratorToggle->getState();
 		config.pathToTerminal = pathToTerminalInput->getInput();
@@ -110,7 +101,7 @@ bool Settings::createWindow() {
 		setText();
 		warningText->setVisible(false);
 		});
-	cancelBtn = new GUI::Button(hInstance, hwnd, 380, 320, 180, 20);
+	cancelBtn = new GUI::Button(hInstance, hwnd, 380, 290, 180, 20);
 	cancelBtn->setCallback([&]() {
 		ShowWindow(hwnd, SW_HIDE);
 		warningText->setVisible(false);
@@ -123,28 +114,24 @@ bool Settings::createWindow() {
 }
 
 void Settings::setText() {
-	Localization* local = new Localization(ConfigManager::getInstance().getConfig().language);
-	settingsText->setText(local->getText("settings"));
-	generalText->setText(local->getText("general"));
-	pathToTerminalText->setText(local->getText("pathToTerminal"));
-	localizationText->setText(local->getText("localization"));
-	launchByDefaultText->setText(local->getText("launchByDefault"));
-	runAsAdministratorText->setText(local->getText("runAsAdministrator"));
-	keyAssignmentText->setText(local->getText("keyAssignment"));
-	sendCommandText->setText(local->getText("sendCommand"));
-	sendCommandParameterText->setText(local->getText("sendCommandParameter"));
-	chooseFolderText->setText(local->getText("chooseFolder"));
-	warningText->setText(local->getText("warning"));
-	saveBtn->setText(local->getText("save"));
-	cancelBtn->setText(local->getText("cancel"));
+	settingsText->setText("Settings");
+	generalText->setText("General");
+	pathToTerminalText->setText("Path to terminal:");
+	launchByDefaultText->setText("Launch by default:");
+	runAsAdministratorText->setText("Run as administrator:");
+	keyAssignmentText->setText("Key assignment");
+	sendCommandText->setText("Send command:");
+	sendCommandParameterText->setText("Send command (Change parameter):");
+	chooseFolderText->setText("Choose folder:");
+	warningText->setText("To apply the settings, you need to close the current terminal process");
+	saveBtn->setText("Save");
+	cancelBtn->setText("Cancel");
 	InvalidateRect(hwnd, NULL, TRUE);
 	UpdateWindow(hwnd);
-	delete local;
 }
 
 void Settings::setInput() {
 	pathToTerminalInput->setInput(ConfigManager::getInstance().getConfig().pathToTerminal);
-	localizationDropdown->setValue(ConfigManager::getInstance().getConfig().language);
 	launchByDefaultToggle->setState(ConfigManager::getInstance().getConfig().launchByDefault);
 	runAsAdministratorToggle->setState(ConfigManager::getInstance().getConfig().runAsAdministrator);
 	sendCommandInput->setText(ConfigManager::getInstance().getConfig().sendCommand);

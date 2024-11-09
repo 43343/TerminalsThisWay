@@ -12,11 +12,14 @@
 class Updater
 {
 public:
-	Updater(HINSTANCE hInstance);
+	Updater();
 	~Updater();
 	bool DownloadFile(const std::string& url, const std::string& localPath);
 	std::string GetLatestVersion();
-	void RestartApplication(const std::string& newAppPath);
+	void RestartApplication();
+	void checkUpdate();
+	bool getActive();
 private:
+	bool isActive = false;
 	ModalWindow* modalWindow;
 };

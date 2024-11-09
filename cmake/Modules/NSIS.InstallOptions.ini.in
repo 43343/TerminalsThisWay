@@ -1,0 +1,11 @@
+[Settings]
+NumFields=1
+
+[Field 1]
+Type=CheckBox
+Text=Add @CPACK_PACKAGE_NAME@ shortcut to the Desktop
+Left=0
+Right=-1
+Top=10
+Bottom=30
+State=1

@@ -8,7 +8,6 @@ class Config {
 public:
     Config() {};
     std::string pathToTerminal;
-    std::string language;
     int launchByDefault;
     int runAsAdministrator;
     std::string sendCommand;

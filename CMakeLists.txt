@@ -11,10 +11,7 @@ if(WIN32)
 endif()
 
 if(MSVC)
-	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
-    set(CMAKE_GENERATOR_PLATFORM Win32)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:IA32")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MACHINE:X86")
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
 endif()
 
 configure_file(
@@ -32,8 +29,6 @@ configure_file(
     src/win/Window/settings.h
     src/win/Window/GUI/inputField.cpp
     src/win/Window/GUI/inputField.h
-    src/win/Window/GUI/dropdown.cpp
-    src/win/Window/GUI/dropdown.h
     src/win/Window/GUI/toggle.cpp
     src/win/Window/GUI/toggle.h
     src/win/Window/GUI/InputKeyBind.cpp
@@ -44,8 +39,6 @@ configure_file(
     src/win/Window/GUI/button.h
     src/win/Window/GUI/image.cpp
     src/win/Window/GUI/image.h
-    src/win/Window/localization.cpp
-    src/win/Window/localization.h
     src/win/Window/parameterInputWindow.cpp
     src/win/Window/parameterInputWindow.h
     src/win/Window/about.cpp
@@ -80,11 +73,14 @@ if(LINUX)
   target_link_libraries(TerminalsThisWay ${X11_LIBRARIES})
   target_include_directories(TerminalsThisWay PRIVATE ${X11_INCLUDE_DIR})
 endif()
-if(WIN32)
+if(MSVC)
     list(APPEND SourcesWin ${APP_ICON_RESOURCE_WINDOWS})
     add_executable(TerminalsThisWay ${SourcesWin})
     target_link_libraries(TerminalsThisWay PRIVATE wininet)
-    include(CPack)
 endif()
 
-install(TARGETS TerminalsThisWay)
+install(TARGETS TerminalsThisWay DESTINATION .)
+
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/Modules" ${CMAKE_MODULE_PATH})
+
+include(cmake/Templates/CPackConfig.cmake)

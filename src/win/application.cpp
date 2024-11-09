@@ -9,24 +9,29 @@
 #include "updater.h"
 #include <windows.h>
 #include "UIAutomation.h"
-#include "Window/localization.h"
+#include <shlobj.h>
 
 HANDLE hMutex;
 
 Application::Application() {
 
-	char path[MAX_PATH];
-	if (GetModuleFileName(NULL, path, MAX_PATH) == 0) {
-		std::cerr << "Failed to get module file name. Error: " << GetLastError() << std::endl;
-		return;
-	}
-
-	std::string szPath = path;
-	std::string szDir = szPath.substr(0, szPath.rfind("\\") + 1);
-	std::cout << "Attempting to set current directory to: " << path << std::endl;
-	if (!SetCurrentDirectory((LPTSTR)szDir.c_str())) {
-		std::cerr << "Failed to set current directory. Error: " << GetLastError() << std::endl;
-	}
+	char appDataPath[MAX_PATH];
+	if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_APPDATA, NULL, 0, appDataPath)))
+	{
+		std::string newFolderPath = std::string(appDataPath) + "\\TerminalsThisWay";
+		if (CreateDirectoryA(newFolderPath.c_str(), NULL)) {
+			std::cout << "Папка успешно создана: " << newFolderPath << std::endl;
+		}
+		else if (GetLastError() == ERROR_ALREADY_EXISTS) {
+			std::cout << "Папка уже существует: " << newFolderPath << std::endl;
+		}
+		else {
+			std::cerr << "Не удалось создать папку: " << newFolderPath << ", ошибка: " << GetLastError() << std::endl;
+		}
+		if (!SetCurrentDirectory((LPTSTR)newFolderPath.c_str())) {
+			std::cerr << "Failed to set current directory. Error: " << GetLastError() << std::endl;
+		}
+	};
 
 
 	ConfigManager::getInstance().generateConfigFile("config.conf");
@@ -34,6 +39,7 @@ Application::Application() {
 	Config& config = ConfigManager::getInstance().getConfig();
 
 	const char* mutexName = "TerminalsThisWayMutex";
+	Sleep(1000);
 
 	hMutex = CreateMutexA(NULL, FALSE, mutexName);
 
@@ -43,15 +49,12 @@ Application::Application() {
 	}
 
 	if (GetLastError() == ERROR_ALREADY_EXISTS) {
-		Localization* local = new Localization(config.language);
 		std::cout << "Another instance of the application is already running." << std::endl;
-		MessageBoxA(NULL, local->getText("applicationAlreadyRunningDescription").c_str(), local->getText("applicationAlreadyRunning").c_str(), MB_ICONEXCLAMATION | MB_OK);
+		MessageBoxA(NULL, "Another instance of the application is already running.", "Application already running", MB_ICONEXCLAMATION | MB_OK);
 		PostQuitMessage(0);
 		CloseHandle(hMutex);
 		return; // Завершаем приложение
 	}
-
-
 	HINSTANCE hInstance = GetModuleHandle(nullptr);
 	Terminal* cmdTerminal = new Terminal();
 	if (config.runAsAdministrator && runAsAdministrator())
@@ -61,7 +64,6 @@ Application::Application() {
 	}
 
 	std::cout << "PathToTerminal: " << config.pathToTerminal << std::endl;
-	std::cout << "Language: " << config.language << std::endl;
 	std::cout << "LaunchByDefault: " << config.launchByDefault << std::endl;
 	std::cout << "RunAsAdministrator: " << config.runAsAdministrator << std::endl;
 	std::cout << "SendCommand: " << config.sendCommand << std::endl;
@@ -73,7 +75,6 @@ Application::Application() {
 	ParameterInputWindow* parameterInputWindow = new ParameterInputWindow(cmdTerminal, hInstance, *uiAutomation);
 	std::cout << "Press 'Insert' to get selected text..." << std::endl;
 
-	std::wcout << "Даун";
 }
 Application::~Application()
 {

@@ -124,7 +124,7 @@ LRESULT CALLBACK UIAutomation::LowLevelKeyboardProc(int nCode, WPARAM wParam, LP
 							g_UIAutomationInstance->firstPressDetected = false;
 						}
 						else {
-							firstPressTime = currentTime; // Îáíîâëÿåì âðåìÿ ïåðâîãî íàæàòèÿ
+							firstPressTime = currentTime; 
 						}
 					}
 				}
@@ -132,10 +132,10 @@ LRESULT CALLBACK UIAutomation::LowLevelKeyboardProc(int nCode, WPARAM wParam, LP
 			else
 			{
 				if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
-					if (pKeyboard->vkCode == ConfigManager::getInstance().getConfig().keySendCommand1) { // Êîä äëÿ 'A'
+					if (pKeyboard->vkCode == ConfigManager::getInstance().getConfig().keySendCommand1) { 
 						g_UIAutomationInstance->keyA_pressed = true;
 					}
-					if (pKeyboard->vkCode == ConfigManager::getInstance().getConfig().keySendCommand2) { // Êîä äëÿ 'B'
+					if (pKeyboard->vkCode == ConfigManager::getInstance().getConfig().keySendCommand2) { 
 						g_UIAutomationInstance->keyB_pressed = true;
 					}
 				}
@@ -156,7 +156,6 @@ LRESULT CALLBACK UIAutomation::LowLevelKeyboardProc(int nCode, WPARAM wParam, LP
 						command += "\r\n";
 						g_UIAutomationInstance->hTerminal->sendCommandToCMD(command);
 					}
-					// Âûïîëíèòå íóæíîå äåéñòâèå
 				}
 			}
 		}

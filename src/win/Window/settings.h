@@ -2,7 +2,6 @@
 #include <windows.h>
 #include <string>
 #include "GUI/inputField.h"
-#include "GUI/dropdown.h"
 #include "GUI/toggle.h"
 #include "GUI/inputKeyBind.h"
 #include "GUI/text.h"
@@ -28,9 +27,6 @@ private:
 
     GUI::Text* pathToTerminalText;
     GUI::InputField* pathToTerminalInput;
-
-    GUI::Text* localizationText;
-    GUI::Dropdown* localizationDropdown;
 
     GUI::Text* launchByDefaultText;
     GUI::Toggle* launchByDefaultToggle;

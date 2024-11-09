@@ -7,12 +7,11 @@
 class ModalWindow
 {
 public:
-	ModalWindow(HINSTANCE hInstance);
+	ModalWindow();
 	~ModalWindow();
-	void createWindow(const std::string& currentVersion, const std::string& latestVersion, std::function<void()> cb);
+	bool createWindow(const std::string& currentVersion, const std::string& latestVersion);
 private:
 	static LRESULT CALLBACK ModalWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-	HINSTANCE hInstance;
 	HWND hwnd;
 	GUI::Button* btnYes;
 	GUI::Button* btnNo;
