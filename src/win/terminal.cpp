@@ -35,7 +35,7 @@ void Terminal::createProcessCMD(const std::string& path)
 {
 	DWORD ThreadID;
 
-	if (IsProcessRunning(startedProcessIDs)) {
+	if (IsProcessRunning(startedProcessIDs) && startedProcessIDs) {
 		std::cout << "A terminal process is already running." << std::endl;
 		return; // Terminal is already running, no need to start another
 	}
