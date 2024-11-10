@@ -10,6 +10,7 @@
 #include <windows.h>
 #include "UIAutomation.h"
 #include <shlobj.h>
+#include <cstdio>
 
 HANDLE hMutex;
 
@@ -62,6 +63,16 @@ Application::Application() {
 		PostQuitMessage(0);
 		cmdTerminal->sendCommandToCMD("exit\r\n");
 	}
+
+	if (std::remove("TerminalsThisWayNew.exe") == 0)
+	{
+		std::cout << "The file was successfully deleted";
+	}
+	else
+	{
+		std::cout << "Error deleting a file";
+	}
+
 
 	std::cout << "PathToTerminal: " << config.pathToTerminal << std::endl;
 	std::cout << "LaunchByDefault: " << config.launchByDefault << std::endl;

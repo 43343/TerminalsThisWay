@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(TerminalsThisWay VERSION 0.0.1 LANGUAGES CXX)
+project(TerminalsThisWay VERSION 0.0.2 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -52,6 +52,7 @@ configure_file(
     src/win/Config/configManager.h
     src/win/Utility/utility.cpp
     src/win/Utility/utility.h
+    src/win/Utility/json.hpp
     src/win/uiAutomation.cpp
     src/win/uiAutomation.h
     src/win/chooseFolder.cpp

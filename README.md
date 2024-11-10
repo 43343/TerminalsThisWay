@@ -7,6 +7,18 @@ The purposes for which you may need TerminalsThisWay:
 + You can select any text in your browser, and when you press the keys you specified (Insert by default), the command will be executed automatically in the terminal
 + Also, when you press the keys you selected (Home by default), a window will open for you to select a directory to which you can transfer your command line.
 
+# Install
+## Windows
+
+You can download the Windows version below:
+
++ [64-bit](https://github.com/43343/TerminalsThisWay/releases/download/0.0.2/TerminalsThisWay-0.0.2-win64.exe)
++ ~32-bit~ soon...
+
+## Linux
+soon...
+
+
 # Build
 ## Windows
 ### System requirements
