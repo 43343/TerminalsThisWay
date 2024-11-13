@@ -27,7 +27,7 @@ set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
 set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
   IfSilent +2
   GoTo NotSilent
-  ExecWait '$INSTDIR\\TerminalsThisWay.exe --update'
+  Exec '$INSTDIR\\TerminalsThisWay.exe --update'
   NotSilent:
 ")
 set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
