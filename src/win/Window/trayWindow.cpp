@@ -111,7 +111,7 @@ LRESULT CALLBACK TrayWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 		case ID_TRAY_RESTART_ADMIN:
 			if (runAsAdministrator())
 			{
-				PostQuitMessage(0);
+				exit(0);
 				g_TrayWindow->hTerminal.sendCommandToCMD("exit\r\n");
 			}
 			break;
@@ -156,7 +156,7 @@ LRESULT CALLBACK TrayWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 		case ID_TRAY_EXIT:
 			g_TrayWindow->hTerminal.sendCommandToCMD("exit\r\n");
 			Shell_NotifyIcon(NIM_DELETE, &nid);
-			PostQuitMessage(0);
+			exit(0);
 			break;
 		}
 		break;
@@ -164,7 +164,7 @@ LRESULT CALLBACK TrayWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 	case WM_DESTROY:
 		g_TrayWindow->hTerminal.sendCommandToCMD("exit\r\n");
 		Shell_NotifyIcon(NIM_DELETE, &nid);
-		PostQuitMessage(0);
+		exit(0);
 		break;
 
 	default:

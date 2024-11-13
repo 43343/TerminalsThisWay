@@ -24,7 +24,7 @@ void Updater::checkUpdate()
 		}
 		else
 		{
-			if (latestVersion != currentVersion)
+			if (latestVersion > currentVersion)
 			{
 				if (modalWindow->createWindow(currentVersion, latestVersion))
 				{

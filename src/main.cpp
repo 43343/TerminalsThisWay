@@ -9,7 +9,7 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    Application app;
+    Application app(argc,argv);
 
     return app.Run();
 }

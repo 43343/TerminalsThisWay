@@ -3,7 +3,7 @@
 class Application
 {
 public:
-	Application();
+	Application(int argc, char* argv[]);
   ~Application();
 	int Run();
 };

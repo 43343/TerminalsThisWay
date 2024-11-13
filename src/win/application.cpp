@@ -2,9 +2,9 @@
 #include "Window/parameterInputWindow.h"
 #include "Utility/utility.h"
 #include "terminal.h"
-#include "chooseFolder.h"
+#include "Window/chooseFolder.h"
 #include "Config/configManager.h"
-#include "window/trayWindow.h"
+#include "Window/trayWindow.h"
 #include <iostream>
 #include "updater.h"
 #include <windows.h>
@@ -14,7 +14,11 @@
 
 HANDLE hMutex;
 
-Application::Application() {
+Application::Application(int argc, char* argv[]) {
+
+	if (argc > 1 && std::string(argv[1]) == "--update") {
+		MessageBoxA(NULL, "The update was successfully installed", "Update is installed", MB_ICONINFORMATION | MB_OK);
+	}
 
 	char appDataPath[MAX_PATH];
 	if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_APPDATA, NULL, 0, appDataPath)))

@@ -12,7 +12,7 @@ public:
 	void sendCommandToCMD(const std::string& command);
 private:
 	HANDLE CMD_READ, PARENT_WRITE;
-	DWORD startedProcessIDs;
+	DWORD startedProcessIDs = 0;
 	void handle_cleanup(STARTUPINFOW startupinfo, PROCESS_INFORMATION  processinfo);
 	bool IsProcessRunning(DWORD processID);
 };

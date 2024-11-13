@@ -17,20 +17,20 @@ set(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
  set(CPACK_NSIS_ENABLE_FINISH_PAGE ON)
  set(CPACK_NSIS_MUI_FINISHPAGE_RUN "TerminalsThisWay.exe")
 set(CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS "
-  FindProcDLL::FindProc 'TerminalsThisWay.exe'
-  Pop \$R0
-  StrCmp \$R0 '0' process_not_found process_found
-  process_found:
   ExecWait 'taskkill /IM TerminalsThisWay.exe /F'
-  process_not_found:
+  Sleep 1000
 ")
+set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
+  ExecWait 'taskkill /IM TerminalsThisWay.exe /F'
+  Sleep 1000
+ ")
 set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
   IfSilent +2
   GoTo NotSilent
-  ExecWait '$INSTDIR\\TerminalsThisWay.exe'
+  ExecWait '$INSTDIR\\TerminalsThisWay.exe --update'
   NotSilent:
 ")
-
+set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
 set(CPACK_NSIS_MODIFY_PATH ON)
 
 include(CPack)
