@@ -14,11 +14,12 @@ public:
 
     bool createWindow();
 
-    HWND hwnd;
     void setText();
     void setInput();
+    HWND getHwnd();
 private:
     HINSTANCE hInstance;
+    HWND hwnd;
 
    
     GUI::Text* generalText;

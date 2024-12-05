@@ -4,10 +4,10 @@
 namespace GUI {
 	InputField::InputField(HINSTANCE hInstance, int x, int y, int width, int height, HWND parentHwnd)
 		: hInstance(hInstance), parentHwnd(parentHwnd), hwnd(nullptr) {
-		hwnd = CreateWindowEx(
+		hwnd = CreateWindowExW(
 			0,
-			"EDIT",
-			"",
+			L"EDIT",
+			L"",
 			WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | ES_AUTOHSCROLL,
 			x, y, width, height,
 			parentHwnd,
@@ -15,27 +15,28 @@ namespace GUI {
 			hInstance,
 			nullptr
 		);
-		SendMessage(hwnd, EM_LIMITTEXT, 0, 0);
-		SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
-		originalWndProc = (WNDPROC)SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)WindowProc);
+
+		SendMessageW(hwnd, EM_LIMITTEXT, 100, 0);
+		SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+		originalWndProc = (WNDPROC)SetWindowLongPtrW(hwnd, GWLP_WNDPROC, (LONG_PTR)WindowProc);
 	}
-	std::string InputField::getInput() const {
-		// Get the length of the text in the edit control
-		int length = GetWindowTextLength(hwnd);
+	std::wstring InputField::getInput() const {
+		// Получаем длину текста в edit control
+		int length = GetWindowTextLengthW(hwnd);
 		if (length == 0) {
-			return ""; // Return an empty string if there's no text
+			return L""; // Возвращаем пустую строку, если текста нет
 		}
 
-		// Create a buffer to hold the text
-		char* buffer = new char[length + 1]; // +1 for null-terminator
+		// Создаем буфер для хранения текста
+		wchar_t* buffer = new wchar_t[length + 1]; // +1 для null-терминатора
 
-		// Get the text from the edit control
-		GetWindowText(hwnd, buffer, length + 1);
+		// Получаем текст из edit control
+		GetWindowTextW(hwnd, buffer, length + 1);
 
-		// Convert the buffer to a std::string
-		std::string text(buffer);
+		// Конвертируем буфер в std::wstring
+		std::wstring text(buffer);
 
-		// Clean up the buffer
+		// Освобождаем память буфера
 		delete[] buffer;
 
 		return text;
@@ -46,9 +47,9 @@ namespace GUI {
 
 	}
 
-	void InputField::setInput(const std::string& text) {
+	void InputField::setInput(const std::wstring& text) {
 		// Set the text in the edit control
-		SetWindowText(hwnd, text.c_str());
+		SetWindowTextW(hwnd, text.c_str());
 	}
 
 	HWND InputField::getHwnd() const {

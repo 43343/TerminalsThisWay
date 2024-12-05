@@ -1,13 +1,12 @@
 #include "parameterInputWindow.h"
 #include "../Config/configManager.h"
-#include "../uiAutomation.h"
 #include <chrono>
 #include <iostream>
 
 ParameterInputWindow* g_ParameterInputWindowInstance = nullptr;
 auto firstPressTimeParameterInput = std::chrono::steady_clock::now();
 
-ParameterInputWindow::ParameterInputWindow(Terminal* cmd, HINSTANCE instance, UIAutomation& uiAutomation) : hTerminal(*cmd), hUiAutomation(uiAutomation)
+ParameterInputWindow::ParameterInputWindow(Terminal* cmd, HINSTANCE instance, GetText& getText) : hTerminal(*cmd), hGetText(getText)
 {
 	hHook = SetWindowsHookEx(WH_KEYBOARD_LL, LowLevelKeyboardProc, NULL, 0);
 	g_ParameterInputWindowInstance = this;
@@ -24,19 +23,19 @@ void ParameterInputWindow::CreateInputWindow()
 {
 	POINT p;
 	GetCursorPos(&p);
-	const char CLASS_NAME[] = "InputWindowClass";
+	const wchar_t CLASS_NAME[] = L"InputWindowClass";
 
-	WNDCLASS wc = {};
+	WNDCLASSW wc = {};
 	wc.lpfnWndProc = WindowProc;
 	wc.hInstance = GetModuleHandle(NULL);
 	wc.lpszClassName = CLASS_NAME;
 
-	RegisterClass(&wc);
+	RegisterClassW(&wc);
 
-	hwnd = CreateWindowEx(
+	hwnd = CreateWindowExW(
 		WS_EX_TOPMOST | WS_EX_TOOLWINDOW,
 		CLASS_NAME,
-		"",
+		L"",
 		WS_POPUP,
 		p.x, p.y, 200, 20,
 		NULL,
@@ -47,7 +46,7 @@ void ParameterInputWindow::CreateInputWindow()
 
 	isDialogOpen = true;
 	input = new GUI::InputField(hInstance, 0, 0, 200, 20, hwnd);
-	std::string command = hUiAutomation.getSelectedText();
+	std::wstring command = hGetText.getSelectedText();
 	input->setInput(command);
 
 	SetFocus(input->getHwnd());
@@ -83,10 +82,10 @@ LRESULT CALLBACK ParameterInputWindow::LowLevelKeyboardProc(int nCode, WPARAM wP
 		{
 			if ((wParam == WM_KEYUP || wParam == WM_SYSKEYUP) && pKeyboard->vkCode == VK_RETURN)
 			{
-				std::string command = g_ParameterInputWindowInstance->input->getInput();
+				std::wstring command = g_ParameterInputWindowInstance->input->getInput();
 				if (!command.empty())
 				{
-					command += "\r\n";
+					command += L"\n";
 					g_ParameterInputWindowInstance->hTerminal.sendCommandToCMD(command);
 				}
 				DestroyWindow(g_ParameterInputWindowInstance->hwnd);
@@ -121,7 +120,6 @@ LRESULT CALLBACK ParameterInputWindow::LowLevelKeyboardProc(int nCode, WPARAM wP
 						if (duration <= DOUBLE_PRESS_INTERVAL_MS) {
 							if (!g_ParameterInputWindowInstance->isDialogOpen)
 							{
-								std::cout << "I'm here";
 								g_ParameterInputWindowInstance->CreateInputWindow();
 							}
 						}

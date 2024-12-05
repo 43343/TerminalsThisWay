@@ -2,18 +2,18 @@
 #include <windows.h>
 #include "../terminal.h"
 #include "GUI//inputField.h"
-#include "../uiAutomation.h"
+#include "../getText.h"
 
 class ParameterInputWindow
 {
 public:
-	ParameterInputWindow(Terminal* cmd, HINSTANCE instance, UIAutomation& uiAutomation);
+	ParameterInputWindow(Terminal* cmd, HINSTANCE instance, GetText& getText);
 	~ParameterInputWindow();
 private:
 	HHOOK hHook;
 	HWND hwnd;
 	HINSTANCE hInstance;
-	UIAutomation& hUiAutomation;
+	GetText& hGetText;
 	Terminal& hTerminal;
 	GUI::InputField* input;
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

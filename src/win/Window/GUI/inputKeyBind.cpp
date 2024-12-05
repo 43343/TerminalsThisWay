@@ -24,36 +24,38 @@ namespace GUI {
 
 		if (!PtInRect(&rect, pt)) {
 			std::cout << keySequence.c_str();
-			SetWindowText(hwnd, "");
+			SetWindowTextW(hwnd, L"");
 			InvalidateRect(parentHwnd, NULL, TRUE);
 			UpdateWindow(parentHwnd);
-			SetWindowText(hwnd, keySequence.c_str());
+			SetWindowTextW(hwnd, keySequence.c_str());
 		}
 	}
 
-	void InputKeyBind::setText(std::string text) {
+	void InputKeyBind::setText(std::wstring text) {
 		keySequence = text;
-		SetWindowText(hwnd, keySequence.c_str());
+		SetWindowTextW(hwnd, keySequence.c_str());
 	}
-	std::string InputKeyBind::getText() {
+	std::wstring InputKeyBind::getText() {
 		return keySequence;
 	}
 
-	void InputKeyBind::RemoveSpaces(char* str) {
-		char* p1 = str; // Pointer to iterate over the original string
-		char* p2 = str; // Pointer to build the new string without spaces
+	void InputKeyBind::RemoveSpaces(wchar_t* str) {
+		wchar_t* p1 = str; // Указатель для итерации по исходной строке
+		wchar_t* p2 = str; // Указатель для построения строки без пробелов
 
-		while (*p1 != L'\0') {
-			if (*p1 != L' ') {
-				*p2++ = *p1; // Copy non-space character
+		while (*p1 != L'0') { // Пока не конец строки
+			if (*p1 != L' ') { // Если символ не пробел
+				*p2++ = *p1;   // Копируем символ
 			}
-			p1++;
+			p1++; // Переходим к следующему символу
 		}
-		*p2 = L'\0'; // Null-terminate the modified string
+		*p2 = L'0'; // Завершаем строку нулевым символом
 	}
-	void InputKeyBind::GetEnglishKeyNameText(WPARAM wParam, LPARAM lParam, char* keyName, int keyNameSize)
+	void InputKeyBind::GetEnglishKeyNameText(WPARAM wParam, LPARAM lParam, wchar_t* keyName, int keyNameSize)
 	{
 		DWORD vkCode = static_cast<DWORD>(wParam);
+
+		// Обработка клавиш Shift
 		if (vkCode == VK_SHIFT) {
 			bool isLeftShift = GetAsyncKeyState(VK_LSHIFT) & 0x8000;
 			bool isRightShift = GetAsyncKeyState(VK_RSHIFT) & 0x8000;
@@ -65,6 +67,8 @@ namespace GUI {
 				vkCode = VK_RSHIFT;
 			}
 		}
+
+		// Обработка клавиш Control
 		if (vkCode == VK_CONTROL) {
 			bool isLeftCtrl = GetAsyncKeyState(VK_LCONTROL) & 0x8000;
 			bool isRightCtrl = GetAsyncKeyState(VK_RCONTROL) & 0x8000;
@@ -76,6 +80,8 @@ namespace GUI {
 				vkCode = VK_RCONTROL;
 			}
 		}
+
+		// Обработка клавиш Alt (Menu)
 		if (vkCode == VK_MENU) {
 			bool isLeftMenu = GetAsyncKeyState(VK_LMENU) & 0x8000;
 			bool isRightMenu = GetAsyncKeyState(VK_RMENU) & 0x8000;
@@ -87,16 +93,21 @@ namespace GUI {
 				vkCode = VK_RMENU;
 			}
 		}
-		std::string hKey = keyToString(vkCode);
-		printf("Key Pressed: 0x%02Xn", vkCode);
-		if (hKey != "") {
-			strncpy_s(keyName, keyNameSize, hKey.c_str(), _TRUNCATE);
+
+		// Преобразование кода клавиши в строку
+		std::wstring hKey = keyToString(vkCode); // Используем функцию для работы с std::wstring
+
+		wprintf(L"Key Pressed: 0x%02X\n", vkCode); // Выводим код клавиши
+
+		if (!hKey.empty()) {
+			wcsncpy_s(keyName, keyNameSize, hKey.c_str(), _TRUNCATE);
 		}
 		else {
 			// Если клавиша не найдена в таблице сопоставления
-			_snprintf_s(keyName, keyNameSize, _TRUNCATE, "Unknown (0x%02X)", vkCode);
+			_snwprintf_s(keyName, keyNameSize, _TRUNCATE, L"Unknown (0x%02X)", vkCode);
 		}
 	}
+
 	LRESULT CALLBACK InputKeyBind::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		InputKeyBind* keyBind = reinterpret_cast<InputKeyBind*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
 
@@ -106,17 +117,17 @@ namespace GUI {
 		if (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN)
 		{
 			if (btnCount == 0) keyBind->keySequence.clear();
-			SetWindowText(hwnd, "");
+			SetWindowTextW(hwnd, L"");
 			InvalidateRect(keyBind->parentHwnd, NULL, TRUE);
 			UpdateWindow(keyBind->parentHwnd);
-			if (btnCount == 1) keyBind->keySequence += " + ";
-			char keyName[32];
+			if (btnCount == 1) keyBind->keySequence += L" + ";
+			wchar_t keyName[32];
 			keyBind->GetEnglishKeyNameText(wParam, lParam, keyName, sizeof(keyName) / sizeof(wchar_t));
 			keyBind->RemoveSpaces(keyName);
 			keyBind->keySequence += keyName;
 			std::cout << keyBind;
 			std::wcout << L"YES\n";
-			SetWindowText(hwnd, keyBind->keySequence.c_str());
+			SetWindowTextW(hwnd, keyBind->keySequence.c_str());
 			btnCount++;
 			if (btnCount == 2) SetFocus(NULL);
 			if (wParam == VK_MENU)
@@ -126,12 +137,12 @@ namespace GUI {
 		}
 		if (msg == WM_LBUTTONUP)
 		{
-			SetWindowText(hwnd, "");
+			SetWindowTextW(hwnd, L"");
 			InvalidateRect(keyBind->parentHwnd, NULL, TRUE);
 			UpdateWindow(keyBind->parentHwnd);
 			//keyBind->keySequence.clear();
 			std::cout << "LBUTTON";
-			SetWindowText(hwnd, "Нажмите клавишу");
+			SetWindowTextW(hwnd, L"Нажмите клавишу");
 			btnCount = 0;
 		}
 		return CallWindowProc(keyBind->originalWndProc, hwnd, msg, wParam, lParam);

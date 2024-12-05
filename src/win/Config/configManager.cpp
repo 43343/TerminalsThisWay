@@ -1,25 +1,27 @@
-#include "configManager.h"
+п»ї#include "configManager.h"
 #include <string>
 #include <algorithm>
 #include <cctype>
+#include <locale>
+#include <codecvt>
 
 #include "../Utility/utility.h"
 
 
 ConfigManager& ConfigManager::getInstance() {
-	static ConfigManager instance; // Локальная статическая переменная
+	static ConfigManager instance; // Р›РѕРєР°Р»СЊРЅР°СЏ СЃС‚Р°С‚РёС‡РµСЃРєР°СЏ РїРµСЂРµРјРµРЅРЅР°СЏ
 	return instance;
 }
 
-void ConfigManager::generateConfigFile(const std::string& filePath)
+void ConfigManager::generateConfigFile(const std::wstring& filePath)
 {
 	std::ifstream infile(filePath);
 	if (infile.good()) {
-		std::cout << "Файл уже существует: " << filePath << std::endl;
+		std::wcout << "Р¤Р°Р№Р» СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚: " << filePath << std::endl;
 		return;
 	}
 
-	// Если файл не существует, создаем и записываем в него данные
+	// Р•СЃР»Рё С„Р°Р№Р» РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚, СЃРѕР·РґР°РµРј Рё Р·Р°РїРёСЃС‹РІР°РµРј РІ РЅРµРіРѕ РґР°РЅРЅС‹Рµ
 	std::ofstream outfile(filePath);
 	if (outfile.is_open()) {
 		outfile << "PathToTerminal=C:\\Program Files\\PowerShell\\7\\pwsh.exe\n";
@@ -29,24 +31,23 @@ void ConfigManager::generateConfigFile(const std::string& filePath)
 		outfile << "SendCommandParameter=NumLock\n";
 		outfile << "ChooseFolder=Home\n";
 		outfile.close();
-		std::cout << "Файл успешно создан: " << filePath << std::endl;
+		std::wcout << "Р¤Р°Р№Р» СѓСЃРїРµС€РЅРѕ СЃРѕР·РґР°РЅ: " << filePath << std::endl;
 	}
 	else {
-		std::cerr << "Не удалось открыть файл для записи: " << filePath << std::endl;
+		std::wcerr << "РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р» РґР»СЏ Р·Р°РїРёСЃРё: " << filePath << std::endl;
 	}
 }
-void ConfigManager::overwritingConfig(const std::string& filePath, const Config& currentConfig)
+void ConfigManager::overwritingConfig(const std::wstring& filePath, const Config& currentConfig)
 {
-	std::ofstream outfile(filePath);
+	std::wofstream outfile(filePath);
 	if (outfile.is_open()) {
-		outfile << "PathToTerminal=" + currentConfig.pathToTerminal + "\n";
-		outfile << "LaunchByDefault=" + std::to_string(currentConfig.launchByDefault) + "\n";
-		outfile << "RunAsAdministrator=" + std::to_string(currentConfig.runAsAdministrator) + "\n";
-		outfile << "SendCommand=" + currentConfig.sendCommand + "\n";
-		outfile << "SendCommandParameter=" + currentConfig.sendCommandParameter + "\n";
-		outfile << "ChooseFolder=" + currentConfig.chooseFolder + "\n";
+		outfile << L"PathToTerminal=" + currentConfig.pathToTerminal + L"\n";
+		outfile << L"LaunchByDefault=" + std::to_wstring(currentConfig.launchByDefault) + L"\n";
+		outfile << L"RunAsAdministrator=" + std::to_wstring(currentConfig.runAsAdministrator) + L"\n";
+		outfile << L"SendCommand=" + currentConfig.sendCommand + L"\n";
+		outfile << L"SendCommandParameter=" + currentConfig.sendCommandParameter + L"\n";
+		outfile << L"ChooseFolder=" + currentConfig.chooseFolder + L"\n";
 		outfile.close();
-		std::cout << "Файл успешно создан: " << filePath << std::endl;
 		config = currentConfig;
 		setKey(currentConfig.sendCommand, config.keySendCommand1, config.keySendCommand2);
 		setKey(currentConfig.sendCommandParameter, config.keySendCommandParameter1, config.keySendCommandParameter2);
@@ -54,39 +55,39 @@ void ConfigManager::overwritingConfig(const std::string& filePath, const Config&
 		setAutoLaunch(currentConfig.launchByDefault);
 	}
 	else {
-		std::cerr << "Не удалось открыть файл для записи: " << filePath << std::endl;
+		std::wcerr << "РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р» РґР»СЏ Р·Р°РїРёСЃРё: " << filePath << std::endl;
 	}
 }
-void ConfigManager::setKey(const std::string& hKey, int& hKey1, int& hKey2)
+void ConfigManager::setKey(const std::wstring& hKey, int& hKey1, int& hKey2)
 {
 	size_t firstPlusPos = hKey.find('+');
 	size_t secondPlusPos = hKey.find('+', firstPlusPos + 1);
-	std::string key1;
-	std::string key2;
+	std::wstring key1;
+	std::wstring key2;
 
-	if (secondPlusPos != std::string::npos) {
+	if (secondPlusPos != std::wstring::npos) {
 
 		key1 = hKey.substr(0, secondPlusPos);
 		key2 = hKey.substr(secondPlusPos + 1);
 
-		// Убираем пробелы в начале и конце строк (если необходимо)
-		key1.erase(key1.find_last_not_of(" \t\n\r\f\v") + 1);
-		key1.erase(0, key1.find_first_not_of(" \t\n\r\f\v"));
-		key2.erase(key2.find_last_not_of(" \t\n\r\f\v") + 1);
-		key2.erase(0, key2.find_first_not_of(" \t\n\r\f\v"));
+		// Г“ГЎГЁГ°Г ГҐГ¬ ГЇГ°Г®ГЎГҐГ«Г» Гў Г­Г Г·Г Г«ГҐ ГЁ ГЄГ®Г­Г¶ГҐ Г±ГІГ°Г®ГЄ (ГҐГ±Г«ГЁ Г­ГҐГ®ГЎГµГ®Г¤ГЁГ¬Г®)
+		key1.erase(key1.find_last_not_of(L" \t\n\r\f\v") + 1);
+		key1.erase(0, key1.find_first_not_of(L" \t\n\r\f\v"));
+		key2.erase(key2.find_last_not_of(L" \t\n\r\f\v") + 1);
+		key2.erase(0, key2.find_first_not_of(L" \t\n\r\f\v"));
 
 		hKey1 = stringTokey(key1);
 		hKey2 = stringTokey(key2);
 	}
-	else if (firstPlusPos != std::string::npos) {
+	else if (firstPlusPos != std::wstring::npos) {
 		key1 = hKey.substr(0, firstPlusPos);
 		key2 = hKey.substr(firstPlusPos + 1);
 
-		// Убираем пробелы в начале и конце строк (если необходимо)
-		key1.erase(key1.find_last_not_of(" \t\n\r\f\v") + 1);
-		key1.erase(0, key1.find_first_not_of(" \t\n\r\f\v"));
-		key2.erase(key2.find_last_not_of(" \t\n\r\f\v") + 1);
-		key2.erase(0, key2.find_first_not_of(" \t\n\r\f\v"));
+		// Г“ГЎГЁГ°Г ГҐГ¬ ГЇГ°Г®ГЎГҐГ«Г» Гў Г­Г Г·Г Г«ГҐ ГЁ ГЄГ®Г­Г¶ГҐ Г±ГІГ°Г®ГЄ (ГҐГ±Г«ГЁ Г­ГҐГ®ГЎГµГ®Г¤ГЁГ¬Г®)
+		key1.erase(key1.find_last_not_of(L" \t\n\r\f\v") + 1);
+		key1.erase(0, key1.find_first_not_of(L" \t\n\r\f\v"));
+		key2.erase(key2.find_last_not_of(L" \t\n\r\f\v") + 1);
+		key2.erase(0, key2.find_first_not_of(L" \t\n\r\f\v"));
 
 		hKey1 = stringTokey(key1);
 		hKey2 = stringTokey(key2);
@@ -94,39 +95,39 @@ void ConfigManager::setKey(const std::string& hKey, int& hKey1, int& hKey2)
 	}
 	else {
 		key1 = hKey.substr(0, firstPlusPos);
-		key1.erase(key1.find_last_not_of(" \t\n\r\f\v") + 1);
-		key1.erase(0, key1.find_first_not_of(" \t\n\r\f\v"));
+		key1.erase(key1.find_last_not_of(L" \t\n\r\f\v") + 1);
+		key1.erase(0, key1.find_first_not_of(L" \t\n\r\f\v"));
 		hKey1 = stringTokey(key1);
 	}
 
 }
-bool ConfigManager::loadFromFile(const std::string& filePath)
+bool ConfigManager::loadFromFile(const std::wstring& filePath)
 {
-	std::cout << getAbsolutePath(filePath);
-	std::ifstream infile(getAbsolutePath(filePath));
+	std::wcout << getAbsolutePath(filePath);
+	std::wifstream infile(getAbsolutePath(filePath));
 	if (!infile.is_open()) {
-		std::cerr << "Не удалось открыть файл: " << filePath << std::endl;
+		std::wcerr << "ГЌГҐ ГіГ¤Г Г«Г®Г±Гј Г®ГІГЄГ°Г»ГІГј ГґГ Г©Г«: " << filePath << std::endl;
 		return false;
 	}
 
-	std::unordered_map<std::string, std::string> configMap;
-	std::string line;
+	std::unordered_map<std::wstring, std::wstring> configMap;
+	std::wstring line;
 	while (std::getline(infile, line)) {
 		auto delimiterPos = line.find('=');
 		if (delimiterPos != std::string::npos) {
-			std::string key = line.substr(0, delimiterPos);
-			std::string value = line.substr(delimiterPos + 1);
+			std::wstring key = line.substr(0, delimiterPos);
+			std::wstring value = line.substr(delimiterPos + 1);
 			configMap[key] = value;
 		}
 	}
 	infile.close();
 
-	config.pathToTerminal = configMap["PathToTerminal"];
-	config.launchByDefault = std::stoi(configMap["LaunchByDefault"]);
-	config.runAsAdministrator = std::stoi(configMap["RunAsAdministrator"]);
-	config.sendCommand = configMap["SendCommand"];
-	config.sendCommandParameter = configMap["SendCommandParameter"];
-	config.chooseFolder = configMap["ChooseFolder"];
+	config.pathToTerminal = configMap[L"PathToTerminal"];
+	config.launchByDefault = std::stoi(configMap[L"LaunchByDefault"]);
+	config.runAsAdministrator = std::stoi(configMap[L"RunAsAdministrator"]);
+	config.sendCommand = configMap[L"SendCommand"];
+	config.sendCommandParameter = configMap[L"SendCommandParameter"];
+	config.chooseFolder = configMap[L"ChooseFolder"];
 	setKey(config.sendCommand, config.keySendCommand1, config.keySendCommand2);
 	setKey(config.sendCommandParameter, config.keySendCommandParameter1, config.keySendCommandParameter2);
 	setKey(config.chooseFolder, config.keyChooseFolder1, config.keyChooseFolder2);
@@ -154,7 +155,7 @@ bool ConfigManager::setAutoLaunch(bool enable)
 		return false;
 	}
 	if (enable) {
-		// Добавляем программу в автозапуск
+		// Р”РѕР±Р°РІР»СЏРµРј РїСЂРѕРіСЂР°РјРјСѓ РІ Р°РІС‚РѕР·Р°РїСѓСЃРє
 		result = RegSetValueEx(hKey, appName, 0, REG_SZ,
 			reinterpret_cast<const BYTE*>(path),
 			static_cast<DWORD>((strlen(path) + 1) * sizeof(char)));
@@ -165,7 +166,7 @@ bool ConfigManager::setAutoLaunch(bool enable)
 		}
 	}
 	else {
-		// Удаляем программу из автозапуска
+		// РЈРґР°Р»СЏРµРј РїСЂРѕРіСЂР°РјРјСѓ РёР· Р°РІС‚РѕР·Р°РїСѓСЃРєР°
 		result = RegDeleteValue(hKey, appName);
 		if (result != ERROR_SUCCESS && result != ERROR_FILE_NOT_FOUND) {
 			std::cerr << "Failed to delete registry value." << std::endl;
@@ -177,9 +178,9 @@ bool ConfigManager::setAutoLaunch(bool enable)
 	return true;
 }
 
-std::string ConfigManager::getAbsolutePath(const std::string& relativePath)
+std::wstring ConfigManager::getAbsolutePath(const std::wstring& relativePath)
 {
-	return std::filesystem::absolute(relativePath).string();
+	return std::filesystem::absolute(relativePath).wstring();
 }
 
 Config& ConfigManager::getConfig()

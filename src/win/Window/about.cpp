@@ -48,7 +48,7 @@ bool About::createWindow()
 	text1->setFontSize(10);
 	btnOk = new GUI::Button(hInstance, hwnd, 260, 15, 140, 35);
 	btnOk->setCallback([&]() {
-		ShowWindow(hwnd, SW_HIDE);
+		DestroyWindow(hwnd);
 		});
 	btnCheckUpdate = new GUI::Button(hInstance, hwnd, 260, 60, 140, 35);
 	btnCheckUpdate->setFontSize(8);
@@ -68,6 +68,11 @@ void About::setText()
 	btnCheckUpdate->setText("Check for updates");
 }
 
+HWND About::getHwnd()
+{
+	return hwnd;
+}
+
 LRESULT CALLBACK About::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	About* pThis = reinterpret_cast<About*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 	CREATESTRUCT* pCreate = (CREATESTRUCT*)lParam;
@@ -81,10 +86,10 @@ LRESULT CALLBACK About::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 		pThis->hwnd = hWnd;
 		break;
 	case WM_DESTROY:
-		ShowWindow(hWnd, SW_HIDE);
+		DestroyWindow(hWnd);
 		break;
 	case WM_CLOSE:
-		ShowWindow(hWnd, SW_HIDE);
+		DestroyWindow(hWnd);
 		return 0;
 	case WM_CTLCOLORSTATIC:
 		HDC hdcStatic = (HDC)wParam;

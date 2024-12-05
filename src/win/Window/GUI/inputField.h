@@ -7,8 +7,8 @@ namespace GUI {
     class InputField {
     public:
         InputField(HINSTANCE hInstance, int x, int y, int width, int height, HWND parentHwnd = nullptr);
-        std::string getInput() const;
-        void setInput(const std::string& text);
+        std::wstring getInput() const;
+        void setInput(const std::wstring& text);
         void setCallback(std::function<void()> cb);
 
         HWND getHwnd() const;

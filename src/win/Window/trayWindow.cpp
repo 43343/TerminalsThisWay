@@ -111,20 +111,20 @@ LRESULT CALLBACK TrayWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 		case ID_TRAY_RESTART_ADMIN:
 			if (runAsAdministrator())
 			{
+				g_TrayWindow->hTerminal.sendCommandToCMD(L"exit\r\n");
 				exit(0);
-				g_TrayWindow->hTerminal.sendCommandToCMD("exit\r\n");
 			}
 			break;
 		case ID_TRAY_UPDATE:
-			ConfigManager::getInstance().generateConfigFile("config.conf");
-			ConfigManager::getInstance().loadFromFile("config.conf");
+			ConfigManager::getInstance().generateConfigFile(L"config.conf");
+			ConfigManager::getInstance().loadFromFile(L"config.conf");
 			if (settingsWindow)
 			{
 				settingsWindow->setInput();
 			}
 			break;
 		case ID_TRAY_SETTINGS:
-			if (!settingsWindow) {
+			if (!settingsWindow || !IsWindow(settingsWindow->getHwnd())) {
 				settingsWindow = new Settings(GetModuleHandle(NULL));
 				if (!settingsWindow->createWindow()) {
 					delete settingsWindow;
@@ -132,14 +132,14 @@ LRESULT CALLBACK TrayWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 				}
 			}
 			else {
-				if (!IsWindowVisible(settingsWindow->hwnd)) {
-					ShowWindow(settingsWindow->hwnd, SW_SHOW);
+				if (!IsWindowVisible(settingsWindow->getHwnd())) {
+					ShowWindow(settingsWindow->getHwnd(), SW_SHOW);
 				}
-				SetForegroundWindow(settingsWindow->hwnd);
+				SetForegroundWindow(settingsWindow->getHwnd());
 			}
 			break;
 		case ID_TRAY_ABOUT:
-			if (!aboutWindow) {
+			if (!aboutWindow || !IsWindow(aboutWindow->getHwnd())) {
 				aboutWindow = new About(GetModuleHandle(NULL));
 				if (!aboutWindow->createWindow()) {
 					delete aboutWindow;
@@ -147,14 +147,14 @@ LRESULT CALLBACK TrayWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 				}
 			}
 			else {
-				if (!IsWindowVisible(aboutWindow->hwnd)) {
-					ShowWindow(aboutWindow->hwnd, SW_SHOW);
+				if (!IsWindowVisible(aboutWindow->getHwnd())) {
+					ShowWindow(aboutWindow->getHwnd(), SW_SHOW);
 				}
-				SetForegroundWindow(aboutWindow->hwnd);
+				SetForegroundWindow(aboutWindow->getHwnd());
 			}
 			break;
 		case ID_TRAY_EXIT:
-			g_TrayWindow->hTerminal.sendCommandToCMD("exit\r\n");
+			g_TrayWindow->hTerminal.sendCommandToCMD(L"exit\r\n");
 			Shell_NotifyIcon(NIM_DELETE, &nid);
 			exit(0);
 			break;
@@ -162,7 +162,7 @@ LRESULT CALLBACK TrayWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 		break;
 
 	case WM_DESTROY:
-		g_TrayWindow->hTerminal.sendCommandToCMD("exit\r\n");
+		g_TrayWindow->hTerminal.sendCommandToCMD(L"exit\r\n");
 		Shell_NotifyIcon(NIM_DELETE, &nid);
 		exit(0);
 		break;

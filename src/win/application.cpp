@@ -8,14 +8,15 @@
 #include <iostream>
 #include "updater.h"
 #include <windows.h>
-#include "UIAutomation.h"
+#include "getText.h"
 #include <shlobj.h>
 #include <cstdio>
 
 HANDLE hMutex;
 
 Application::Application(int argc, char* argv[]) {
-
+	SetConsoleOutputCP(65001);
+	SetConsoleCP(65001);
 	if (argc > 1 && std::string(argv[1]) == "--update") {
 		MessageBoxA(NULL, "The update was successfully installed", "Update is installed", MB_ICONINFORMATION | MB_OK);
 	}
@@ -39,8 +40,8 @@ Application::Application(int argc, char* argv[]) {
 	};
 
 
-	ConfigManager::getInstance().generateConfigFile("config.conf");
-	ConfigManager::getInstance().loadFromFile("config.conf");
+	ConfigManager::getInstance().generateConfigFile(L"config.conf");
+	ConfigManager::getInstance().loadFromFile(L"config.conf");
 	Config& config = ConfigManager::getInstance().getConfig();
 
 	const char* mutexName = "TerminalsThisWayMutex";
@@ -58,14 +59,14 @@ Application::Application(int argc, char* argv[]) {
 		MessageBoxA(NULL, "Another instance of the application is already running.", "Application already running", MB_ICONEXCLAMATION | MB_OK);
 		PostQuitMessage(0);
 		CloseHandle(hMutex);
-		return; // Завершаем приложение
+		return; 
 	}
 	HINSTANCE hInstance = GetModuleHandle(nullptr);
 	Terminal* cmdTerminal = new Terminal();
 	if (config.runAsAdministrator && runAsAdministrator())
 	{
+		cmdTerminal->sendCommandToCMD(L"exit\r\n");
 		PostQuitMessage(0);
-		cmdTerminal->sendCommandToCMD("exit\r\n");
 	}
 
 	if (std::remove("TerminalsThisWayNew.exe") == 0)
@@ -78,17 +79,16 @@ Application::Application(int argc, char* argv[]) {
 	}
 
 
-	std::cout << "PathToTerminal: " << config.pathToTerminal << std::endl;
-	std::cout << "LaunchByDefault: " << config.launchByDefault << std::endl;
-	std::cout << "RunAsAdministrator: " << config.runAsAdministrator << std::endl;
-	std::cout << "SendCommand: " << config.sendCommand << std::endl;
-	std::cout << "SendCommandParameter: " << config.sendCommandParameter << std::endl;
-	std::cout << "ChooseFolder: " << config.chooseFolder << std::endl;
+	std::wcout << "PathToTerminal: " << config.pathToTerminal << std::endl;
+	std::wcout << "LaunchByDefault: " << config.launchByDefault << std::endl;
+	std::wcout << "RunAsAdministrator: " << config.runAsAdministrator << std::endl;
+	std::wcout << "SendCommand: " << config.sendCommand << std::endl;
+	std::wcout << "SendCommandParameter: " << config.sendCommandParameter << std::endl;
+	std::wcout << "ChooseFolder: " << config.chooseFolder << std::endl;
 	TrayWindow* trayWindow = new TrayWindow(hInstance, cmdTerminal);
 	ChooseFolder* chooseFolder = new ChooseFolder(cmdTerminal);
-	UIAutomation* uiAutomation = new UIAutomation(cmdTerminal);
-	ParameterInputWindow* parameterInputWindow = new ParameterInputWindow(cmdTerminal, hInstance, *uiAutomation);
-	std::cout << "Press 'Insert' to get selected text..." << std::endl;
+	GetText* getText = new GetText(cmdTerminal);
+	ParameterInputWindow* parameterInputWindow = new ParameterInputWindow(cmdTerminal, hInstance, *getText);
 
 }
 Application::~Application()

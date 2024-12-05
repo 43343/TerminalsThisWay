@@ -7,12 +7,12 @@
 class Config {
 public:
     Config() {};
-    std::string pathToTerminal;
+    std::wstring pathToTerminal;
     int launchByDefault;
     int runAsAdministrator;
-    std::string sendCommand;
-    std::string sendCommandParameter;
-    std::string chooseFolder;
+    std::wstring sendCommand;
+    std::wstring sendCommandParameter;
+    std::wstring chooseFolder;
     int keySendCommand1 = 0;
     int keySendCommand2 = 0;
     int keySendCommandParameter1 = 0;

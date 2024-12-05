@@ -2,9 +2,9 @@
 #include <iostream>
 #include <shlobj.h>
 #include "../Config/configManager.h"
+#include <locale>
 ChooseFolder* g_ChooseFolderInstance = nullptr;
 auto firstPressTimeChooseFolder = std::chrono::steady_clock::now();
-HHOOK g_hHook = NULL;
 
 ChooseFolder::ChooseFolder(Terminal* cmd) : hTerminal(*cmd)
 {
@@ -17,23 +17,23 @@ ChooseFolder::~ChooseFolder()
 		UnhookWindowsHookEx(hHook);
 	}
 }
-std::string ChooseFolder::SelectFolder()
+std::wstring ChooseFolder::SelectFolder()
 {
 	isDialogOpen = true;
-	const char CLASS_NAME[] = "BrowserInfoWindowClass";
+	const wchar_t CLASS_NAME[] = L"BrowserInfoWindowClass";
 
-	WNDCLASS wc = {};
+	WNDCLASSW wc = {};
 	wc.lpfnWndProc = WindowProc;
 	wc.hInstance = GetModuleHandle(NULL);
 	wc.lpszClassName = CLASS_NAME;
 
-	RegisterClass(&wc);
+	RegisterClassW(&wc);
 	HWND hwndParent;
 
-	hwndParent = CreateWindowEx(
+	hwndParent = CreateWindowExW(
 		WS_EX_TOPMOST | WS_EX_TOOLWINDOW,
 		CLASS_NAME,
-		"",
+		L"",
 		WS_POPUP,
 		0, 0, 200, 20,
 		NULL,
@@ -42,29 +42,31 @@ std::string ChooseFolder::SelectFolder()
 		NULL
 	);
 
-	BROWSEINFO bi = { 0 };
-	std::string title = "Select folder";
+	BROWSEINFOW bi = { 0 };
+	std::wstring title = L"똥 폴더";
+	std::wcout << "Выбранный путь: " << title << std::endl;
+	printf("Выбранный путь:");
 	bi.lpszTitle = title.c_str();
 	bi.ulFlags = WS_EX_TOPMOST | BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
 	bi.hwndOwner = hwndParent;
 
-	LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
+	LPITEMIDLIST pidl = SHBrowseForFolderW(&bi);
 
-	std::string result;
+	std::wstring result;
 	 
 	if (pidl != 0)
 	{
 		
-		char path[MAX_PATH];
-		if (SHGetPathFromIDList(pidl, path))
+		wchar_t path[MAX_PATH];
+		if (SHGetPathFromIDListW(pidl, path))
 		{
-			result = std::string(path);
+			result = std::wstring(path);
 		}
-		CoTaskMemFree(pidl);
 	}
-
+	CoTaskMemFree(pidl);
 	DestroyWindow(hwndParent);
-
+	UnregisterClassW(CLASS_NAME, GetModuleHandle(NULL));
+	std::wcout << "Выбранный путь: " << result << std::endl;
 	isDialogOpen = false; 
 
 	return result;
@@ -97,15 +99,15 @@ LRESULT CALLBACK ChooseFolder::LowLevelKeyboardProc(int nCode, WPARAM wParam, LP
 		{
 			if ((wParam == WM_KEYUP || wParam == WM_SYSKEYUP) && pKeyboard->vkCode == ConfigManager::getInstance().getConfig().keyChooseFolder1)
 			{
-				std::string folderPath;
+				std::wstring folderPath;
 				if (!g_ChooseFolderInstance->isDialogOpen)
 				{
 					folderPath = g_ChooseFolderInstance->SelectFolder();
 				}
 				if (!folderPath.empty())
 				{
-					g_ChooseFolderInstance->hTerminal.sendCommandToCMD("cd \"" + folderPath + "\"\r\n");
-					g_ChooseFolderInstance->hTerminal.sendCommandToCMD("cd /d \"" + folderPath + "\"\r\n");
+					g_ChooseFolderInstance->hTerminal.sendCommandToCMD(L"cd \"" + folderPath + L"\"\n");
+					g_ChooseFolderInstance->hTerminal.sendCommandToCMD(L"cd /d \"" + folderPath + L"\"\n");
 				}
 			}
 		}
@@ -124,15 +126,15 @@ LRESULT CALLBACK ChooseFolder::LowLevelKeyboardProc(int nCode, WPARAM wParam, LP
 						auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - firstPressTimeChooseFolder).count();
 
 						if (duration <= DOUBLE_PRESS_INTERVAL_MS) {
-							std::string folderPath;
+							std::wstring folderPath;
 							if (!g_ChooseFolderInstance->isDialogOpen)
 							{
 								folderPath = g_ChooseFolderInstance->SelectFolder();
 							}
 							if (!folderPath.empty())
 							{
-								g_ChooseFolderInstance->hTerminal.sendCommandToCMD("cd \"" + folderPath + "\"\r\n");
-								g_ChooseFolderInstance->hTerminal.sendCommandToCMD("cd /d \"" + folderPath + "\"\r\n");
+								g_ChooseFolderInstance->hTerminal.sendCommandToCMD(L"cd \"" + folderPath + L"\"\n");
+								g_ChooseFolderInstance->hTerminal.sendCommandToCMD(L"cd /d \"" + folderPath + L"\"\n");
 							}
 							g_ChooseFolderInstance->firstPressDetected = false;
 						}
@@ -164,15 +166,15 @@ LRESULT CALLBACK ChooseFolder::LowLevelKeyboardProc(int nCode, WPARAM wParam, LP
 				std::cout << "gParameter1 " << g_ChooseFolderInstance->keyA_pressed << " gParameter2 " << g_ChooseFolderInstance->keyB_pressed;
 
 				if (g_ChooseFolderInstance->keyA_pressed && g_ChooseFolderInstance->keyB_pressed) {
-					std::string folderPath;
+					std::wstring folderPath;
 					if (!g_ChooseFolderInstance->isDialogOpen)
 					{
 						folderPath = g_ChooseFolderInstance->SelectFolder();
 					}
 					if (!folderPath.empty())
 					{
-						g_ChooseFolderInstance->hTerminal.sendCommandToCMD("cd \"" + folderPath + "\"\r\n");
-						g_ChooseFolderInstance->hTerminal.sendCommandToCMD("cd /d \"" + folderPath + "\"\r\n");
+						g_ChooseFolderInstance->hTerminal.sendCommandToCMD(L"cd \"" + folderPath + L"\"\n");
+						g_ChooseFolderInstance->hTerminal.sendCommandToCMD(L"cd /d \"" + folderPath + L"\"\n");
 					}
 					// Âûïîëíèòå íóæíîå äåéñòâèå
 				}

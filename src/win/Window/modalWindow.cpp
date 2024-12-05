@@ -78,8 +78,10 @@ LRESULT CALLBACK ModalWindow::ModalWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, 
 		break;
 	case WM_CLOSE:
 		DestroyWindow(hwnd);
+		PostQuitMessage(0);
 		break;
 	case WM_DESTROY:
+		DestroyWindow(hwnd);
 		PostQuitMessage(0);
 		break;
 	case WM_CTLCOLORSTATIC:

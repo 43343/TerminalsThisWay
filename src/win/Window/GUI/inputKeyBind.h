@@ -9,15 +9,15 @@ namespace GUI {
 		InputKeyBind(HINSTANCE hInstance, HWND parentHwnd, int x, int y, int width, int height);
 		//bool isActive = false;
 		void HandleParentClick(POINT pt);
-		void setText(std::string text);
-		std::string getText();
+		void setText(std::wstring text);
+		std::wstring getText();
 		
 	private:
 		HWND hwnd;
 		HWND parentHwnd;
-		std::string keySequence;
-		void RemoveSpaces(char* str);
-		void GetEnglishKeyNameText(WPARAM wParam, LPARAM lParam, char* keyName, int keyNameSize);
+		std::wstring keySequence;
+		void RemoveSpaces(wchar_t* str);
+		void GetEnglishKeyNameText(WPARAM wParam, LPARAM lParam, wchar_t* keyName, int keyNameSize);
 
 		static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 		WNDPROC originalWndProc;

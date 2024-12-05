@@ -25,6 +25,7 @@ Settings::~Settings()
 }
 
 bool Settings::createWindow() {
+	
 	const char CLASS_NAME[] = "SettingsWindowClass";
 
 	WNDCLASS wc = {};
@@ -89,7 +90,6 @@ bool Settings::createWindow() {
 
 	saveBtn = new GUI::Button(hInstance, hwnd, 190, 290, 180, 20);
 	saveBtn->setCallback([&]() {
-		ShowWindow(hwnd, SW_HIDE);
 		Config config;
 		config.sendCommand = sendCommandInput->getText();
 		config.sendCommandParameter = sendCommandParameterInput->getText();
@@ -97,15 +97,14 @@ bool Settings::createWindow() {
 		config.launchByDefault = launchByDefaultToggle->getState();
 		config.runAsAdministrator = runAsAdministratorToggle->getState();
 		config.pathToTerminal = pathToTerminalInput->getInput();
-		ConfigManager::getInstance().overwritingConfig("config.conf", config);
-		setText();
-		warningText->setVisible(false);
+		ConfigManager::getInstance().overwritingConfig(L"config.conf", config);
+		DestroyWindow(hwnd);
+		UnregisterClass(CLASS_NAME, GetModuleHandle(NULL));
 		});
 	cancelBtn = new GUI::Button(hInstance, hwnd, 380, 290, 180, 20);
 	cancelBtn->setCallback([&]() {
-		ShowWindow(hwnd, SW_HIDE);
-		warningText->setVisible(false);
-		setInput();
+		DestroyWindow(hwnd);
+		UnregisterClass(CLASS_NAME, GetModuleHandle(NULL));
 		});
 	setText();
 	setInput();
@@ -140,6 +139,10 @@ void Settings::setInput() {
 	InvalidateRect(hwnd, NULL, TRUE);
 	UpdateWindow(hwnd);
 }
+HWND Settings::getHwnd()
+{
+	return hwnd;
+}
 
 LRESULT CALLBACK Settings::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	Settings* pThis = reinterpret_cast<Settings*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
@@ -155,6 +158,7 @@ LRESULT CALLBACK Settings::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 		break;
 	case WM_CLOSE:
 		DestroyWindow(hwnd);
+		UnregisterClass("SettingsWindowClass", GetModuleHandle(NULL));
 		return 0;
 	case WM_SIZE:
 		if (wParam != SIZE_RESTORED) {
@@ -172,6 +176,7 @@ LRESULT CALLBACK Settings::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 		break;
 	case WM_DESTROY:
 		DestroyWindow(hwnd);
+		UnregisterClass("SettingsWindowClass", GetModuleHandle(NULL));
 		break;
 	case WM_NCDESTROY:
 		if (pThis) {

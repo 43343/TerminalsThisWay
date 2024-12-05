@@ -12,7 +12,7 @@ private:
 	HHOOK hHook;
 	static LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam); 
-	std::string SelectFolder();
+	std::wstring SelectFolder();
 	bool isDialogOpen = false;
 	bool keyA_pressed = false;
 	bool keyB_pressed = false;
