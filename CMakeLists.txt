@@ -66,6 +66,12 @@ src/main.cpp
 src/application.h
 src/version.h
 src/linux/application.cpp
+src/linux/main_xlib.src
+src/linux/main_xlib.h
+src/ParameterInputWindow.cpp
+src/ParameterInputWindow.h
+src/xlib_helper.h
+src/xlib_helper.cpp
 )
 
 if(LINUX)
