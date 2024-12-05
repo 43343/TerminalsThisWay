@@ -19,7 +19,7 @@ configure_file(
      "../src/version.h"
    )
 
-   set(SourcesWin
+set(SourcesWin
     src/main.cpp
     src/application.h
     src/win/application.cpp
@@ -62,23 +62,23 @@ configure_file(
     src/version.h
 )
 set(SourcesLinux
-src/main.cpp
-src/application.h
-src/version.h
-src/linux/application.cpp
-src/linux/main_xlib.src
-src/linux/main_xlib.h
-src/ParameterInputWindow.cpp
-src/ParameterInputWindow.h
-src/xlib_helper.h
-src/xlib_helper.cpp
+    src/main.cpp
+    src/application.h
+    src/version.h
+    src/linux/application.cpp
+    src/linux/x11/main_xlib.src
+    src/linux/x11/main_xlib.h
+    src/linux/x11/ParameterInputWindow.cpp
+    src/linux/x11/ParameterInputWindow.h
+    src/linux/x11/xlib_helper.h
+    src/linux/x11/xlib_helper.cpp
 )
 
 if(LINUX)
-  find_package(X11)
-  add_executable(TerminalsThisWay ${SourcesLinux})
-  target_link_libraries(TerminalsThisWay ${X11_LIBRARIES})
-  target_include_directories(TerminalsThisWay PRIVATE ${X11_INCLUDE_DIR})
+   find_package(X11)
+   add_executable(TerminalsThisWay ${SourcesLinux})
+   target_link_libraries(TerminalsThisWay ${X11_LIBRARIES})
+   target_include_directories(TerminalsThisWay PRIVATE ${X11_INCLUDE_DIR})
 endif()
 if(WIN32)
     list(APPEND SourcesWin ${APP_ICON_RESOURCE_WINDOWS})
