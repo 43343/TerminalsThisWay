@@ -13,7 +13,6 @@ public:
 private:
 	HHOOK hHook;
 	static LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
-	//UIAutomation* g_UIAutomationInstance = nullptr;
 	Terminal* hTerminal;
 	bool keyA_pressed = false;
 	bool keyB_pressed = false;

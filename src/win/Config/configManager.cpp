@@ -9,7 +9,7 @@
 
 
 ConfigManager& ConfigManager::getInstance() {
-	static ConfigManager instance; // Локальная статическая переменная
+	static ConfigManager instance; 
 	return instance;
 }
 
@@ -21,7 +21,7 @@ void ConfigManager::generateConfigFile(const std::wstring& filePath)
 		return;
 	}
 
-	// Если файл не существует, создаем и записываем в него данные
+	
 	std::ofstream outfile(filePath);
 	if (outfile.is_open()) {
 		outfile << "PathToTerminal=C:\\Program Files\\PowerShell\\7\\pwsh.exe\n";
@@ -70,7 +70,7 @@ void ConfigManager::setKey(const std::wstring& hKey, int& hKey1, int& hKey2)
 		key1 = hKey.substr(0, secondPlusPos);
 		key2 = hKey.substr(secondPlusPos + 1);
 
-		// Óáèðàåì ïðîáåëû â íà÷àëå è êîíöå ñòðîê (åñëè íåîáõîäèìî)
+		
 		key1.erase(key1.find_last_not_of(L" \t\n\r\f\v") + 1);
 		key1.erase(0, key1.find_first_not_of(L" \t\n\r\f\v"));
 		key2.erase(key2.find_last_not_of(L" \t\n\r\f\v") + 1);
@@ -83,7 +83,7 @@ void ConfigManager::setKey(const std::wstring& hKey, int& hKey1, int& hKey2)
 		key1 = hKey.substr(0, firstPlusPos);
 		key2 = hKey.substr(firstPlusPos + 1);
 
-		// Óáèðàåì ïðîáåëû â íà÷àëå è êîíöå ñòðîê (åñëè íåîáõîäèìî)
+		
 		key1.erase(key1.find_last_not_of(L" \t\n\r\f\v") + 1);
 		key1.erase(0, key1.find_first_not_of(L" \t\n\r\f\v"));
 		key2.erase(key2.find_last_not_of(L" \t\n\r\f\v") + 1);
@@ -155,7 +155,7 @@ bool ConfigManager::setAutoLaunch(bool enable)
 		return false;
 	}
 	if (enable) {
-		// Добавляем программу в автозапуск
+		
 		result = RegSetValueEx(hKey, appName, 0, REG_SZ,
 			reinterpret_cast<const BYTE*>(path),
 			static_cast<DWORD>((strlen(path) + 1) * sizeof(char)));
@@ -166,7 +166,7 @@ bool ConfigManager::setAutoLaunch(bool enable)
 		}
 	}
 	else {
-		// Удаляем программу из автозапуска
+		
 		result = RegDeleteValue(hKey, appName);
 		if (result != ERROR_SUCCESS && result != ERROR_FILE_NOT_FOUND) {
 			std::cerr << "Failed to delete registry value." << std::endl;

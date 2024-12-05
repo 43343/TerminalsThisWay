@@ -92,14 +92,14 @@ std::string Terminal::utf16ToUtf8(const std::wstring& utf16Str)
 		return std::string();
 	}
 
-	// Вычисляем размер необходимого буфера для UTF-8
+	
 	int utf8Size = WideCharToMultiByte(CP_UTF8, 0, utf16Str.c_str(), -1, nullptr, 0, nullptr, nullptr);
 	if (utf8Size <= 0) {
 		throw std::runtime_error("Failed to calculate UTF-8 string size.");
 	}
 
-	// Конвертируем строку в UTF-8
-	std::string utf8Str(utf8Size - 1, '0'); // -1, чтобы убрать завершающий '0'
+	
+	std::string utf8Str(utf8Size - 1, '0'); 
 	WideCharToMultiByte(CP_UTF8, 0, utf16Str.c_str(), -1, &utf8Str[0], utf8Size, nullptr, nullptr);
 
 	return utf8Str;

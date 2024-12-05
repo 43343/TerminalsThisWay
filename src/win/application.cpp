@@ -26,13 +26,13 @@ Application::Application(int argc, char* argv[]) {
 	{
 		std::string newFolderPath = std::string(appDataPath) + "\\TerminalsThisWay";
 		if (CreateDirectoryA(newFolderPath.c_str(), NULL)) {
-			std::cout << "Папка успешно создана: " << newFolderPath << std::endl;
+			std::cout << "The folder was created successfully: " << newFolderPath << std::endl;
 		}
 		else if (GetLastError() == ERROR_ALREADY_EXISTS) {
-			std::cout << "Папка уже существует: " << newFolderPath << std::endl;
+			std::cout << "The folder already exists: " << newFolderPath << std::endl;
 		}
 		else {
-			std::cerr << "Не удалось создать папку: " << newFolderPath << ", ошибка: " << GetLastError() << std::endl;
+			std::cerr << "Failed to create folder: " << newFolderPath << ", ошибка: " << GetLastError() << std::endl;
 		}
 		if (!SetCurrentDirectory((LPTSTR)newFolderPath.c_str())) {
 			std::cerr << "Failed to set current directory. Error: " << GetLastError() << std::endl;

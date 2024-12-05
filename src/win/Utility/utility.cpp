@@ -110,13 +110,13 @@ DWORD stringTokey(const std::wstring& key) {
 		{L"Clear", 0x0C}
 	};
 
-	// Пытаемся найти ключ в карте
+	
 	auto it = keyMap.find(key);
 	if (it != keyMap.end()) {
-		return it->second; // Возвращаем найденное значение
+		return it->second;
 	}
 	else {
-		return 0; // Если ключ не найден, возвращаем значение по умолчанию
+		return 0; 
 	}
 }
 
@@ -230,15 +230,15 @@ std::wstring keyToString(DWORD keyCode)
 		{0x0C, L"Clear"}
 	};
 
-	// Пытаемся найти код клавиши в карте
+	
 	auto it = keyMap.find(keyCode);
 	if (it != keyMap.end())
 	{
-		return it->second; // Если нашли значение
+		return it->second; 
 	}
 	else
 	{
-		return L"Unknown"; // Если не нашли
+		return L"Unknown"; 
 	}
 }
 bool isRunningAsAdministrator()

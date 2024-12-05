@@ -21,22 +21,22 @@ namespace GUI {
 		originalWndProc = (WNDPROC)SetWindowLongPtrW(hwnd, GWLP_WNDPROC, (LONG_PTR)WindowProc);
 	}
 	std::wstring InputField::getInput() const {
-		// Получаем длину текста в edit control
+		
 		int length = GetWindowTextLengthW(hwnd);
 		if (length == 0) {
-			return L""; // Возвращаем пустую строку, если текста нет
+			return L""; 
 		}
 
-		// Создаем буфер для хранения текста
-		wchar_t* buffer = new wchar_t[length + 1]; // +1 для null-терминатора
+		
+		wchar_t* buffer = new wchar_t[length + 1]; 
 
-		// Получаем текст из edit control
+		
 		GetWindowTextW(hwnd, buffer, length + 1);
 
-		// Конвертируем буфер в std::wstring
+		
 		std::wstring text(buffer);
 
-		// Освобождаем память буфера
+		
 		delete[] buffer;
 
 		return text;

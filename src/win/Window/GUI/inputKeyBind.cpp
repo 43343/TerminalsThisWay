@@ -40,22 +40,22 @@ namespace GUI {
 	}
 
 	void InputKeyBind::RemoveSpaces(wchar_t* str) {
-		wchar_t* p1 = str; // Указатель для итерации по исходной строке
-		wchar_t* p2 = str; // Указатель для построения строки без пробелов
+		wchar_t* p1 = str; 
+		wchar_t* p2 = str; 
 
-		while (*p1 != L'0') { // Пока не конец строки
-			if (*p1 != L' ') { // Если символ не пробел
-				*p2++ = *p1;   // Копируем символ
+		while (*p1 != L'0') { 
+			if (*p1 != L' ') { 
+				*p2++ = *p1;   
 			}
-			p1++; // Переходим к следующему символу
+			p1++; 
 		}
-		*p2 = L'0'; // Завершаем строку нулевым символом
+		*p2 = L'0'; 
 	}
 	void InputKeyBind::GetEnglishKeyNameText(WPARAM wParam, LPARAM lParam, wchar_t* keyName, int keyNameSize)
 	{
 		DWORD vkCode = static_cast<DWORD>(wParam);
 
-		// Обработка клавиш Shift
+		
 		if (vkCode == VK_SHIFT) {
 			bool isLeftShift = GetAsyncKeyState(VK_LSHIFT) & 0x8000;
 			bool isRightShift = GetAsyncKeyState(VK_RSHIFT) & 0x8000;
@@ -68,7 +68,7 @@ namespace GUI {
 			}
 		}
 
-		// Обработка клавиш Control
+		
 		if (vkCode == VK_CONTROL) {
 			bool isLeftCtrl = GetAsyncKeyState(VK_LCONTROL) & 0x8000;
 			bool isRightCtrl = GetAsyncKeyState(VK_RCONTROL) & 0x8000;
@@ -81,7 +81,7 @@ namespace GUI {
 			}
 		}
 
-		// Обработка клавиш Alt (Menu)
+		
 		if (vkCode == VK_MENU) {
 			bool isLeftMenu = GetAsyncKeyState(VK_LMENU) & 0x8000;
 			bool isRightMenu = GetAsyncKeyState(VK_RMENU) & 0x8000;
@@ -94,16 +94,16 @@ namespace GUI {
 			}
 		}
 
-		// Преобразование кода клавиши в строку
-		std::wstring hKey = keyToString(vkCode); // Используем функцию для работы с std::wstring
+		
+		std::wstring hKey = keyToString(vkCode); 
 
-		wprintf(L"Key Pressed: 0x%02X\n", vkCode); // Выводим код клавиши
+		wprintf(L"Key Pressed: 0x%02X\n", vkCode); 
 
 		if (!hKey.empty()) {
 			wcsncpy_s(keyName, keyNameSize, hKey.c_str(), _TRUNCATE);
 		}
 		else {
-			// Если клавиша не найдена в таблице сопоставления
+			
 			_snwprintf_s(keyName, keyNameSize, _TRUNCATE, L"Unknown (0x%02X)", vkCode);
 		}
 	}

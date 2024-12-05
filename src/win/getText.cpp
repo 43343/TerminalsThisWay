@@ -18,47 +18,47 @@ GetText::~GetText()
 }
 std::wstring GetText::GetClipboardText() {
 	if (!OpenClipboard(nullptr)) {
-		return L""; // Не удалось открыть буфер обмена
+		return L""; 
 	}
 
-	HANDLE hData = GetClipboardData(CF_UNICODETEXT); // Получаем данные в формате UTF-16
+	HANDLE hData = GetClipboardData(CF_UNICODETEXT); 
 	if (hData == nullptr) {
 		CloseClipboard();
-		return L""; // Нет данных в буфере обмена
+		return L""; 
 	}
 
-	wchar_t* pszText = static_cast<wchar_t*>(GlobalLock(hData)); // Блокируем память
+	wchar_t* pszText = static_cast<wchar_t*>(GlobalLock(hData)); 
 	if (pszText == nullptr) {
 		CloseClipboard();
-		return L""; // Не удалось заблокировать память
+		return L""; 
 	}
 
-	GlobalUnlock(hData); // Разблокируем память
-	CloseClipboard();    // Закрываем буфер обмена
+	GlobalUnlock(hData); 
+	CloseClipboard();    
 
 	return std::wstring(pszText);
 }
 void GetText::SetClipboardText(const std::wstring& text) {
 	if (!OpenClipboard(nullptr)) {
-		return; // Не удалось открыть буфер обмена
+		return; 
 	}
 
-	EmptyClipboard(); // Очищаем буфер обмена
+	EmptyClipboard();
 
-	// Вычисляем размер данных в байтах для записи в буфер обмена
+	
 	size_t sizeInBytes = (text.size() + 1) * sizeof(wchar_t);
 
-	// Выделяем глобальную память для данных
+	
 	HGLOBAL hGlob = GlobalAlloc(GMEM_MOVEABLE, sizeInBytes);
 	if (hGlob != nullptr) {
-		void* pGlobMem = GlobalLock(hGlob); // Блокируем память
+		void* pGlobMem = GlobalLock(hGlob); 
 		if (pGlobMem != nullptr) {
-			memcpy(pGlobMem, text.c_str(), sizeInBytes); // Копируем данные из std::wstring
-			GlobalUnlock(hGlob);                        // Разблокируем память
-			SetClipboardData(CF_UNICODETEXT, hGlob);    // Устанавливаем данные в буфер обмена
+			memcpy(pGlobMem, text.c_str(), sizeInBytes); 
+			GlobalUnlock(hGlob);                        
+			SetClipboardData(CF_UNICODETEXT, hGlob);    
 		}
 		else {
-			GlobalFree(hGlob); // Освобождаем память, если не удалось заблокировать
+			GlobalFree(hGlob); 
 		}
 	}
 
@@ -66,26 +66,20 @@ void GetText::SetClipboardText(const std::wstring& text) {
 }
 void GetText::SimulateCtrlC() {
 	INPUT inputs[4] = {};
-
-	// Нажатие Ctrl
 	inputs[0].type = INPUT_KEYBOARD;
 	inputs[0].ki.wVk = VK_CONTROL;
 
-	// Нажатие C
 	inputs[1].type = INPUT_KEYBOARD;
 	inputs[1].ki.wVk = 'C';
 
-	// Отпускание C
 	inputs[2].type = INPUT_KEYBOARD;
 	inputs[2].ki.wVk = 'C';
 	inputs[2].ki.dwFlags = KEYEVENTF_KEYUP;
 
-	// Отпускание Ctrl
 	inputs[3].type = INPUT_KEYBOARD;
 	inputs[3].ki.wVk = VK_CONTROL;
 	inputs[3].ki.dwFlags = KEYEVENTF_KEYUP;
 
-	// Отправляем нажатия в систему
 	SendInput(4, inputs, sizeof(INPUT));
 }
 std::wstring GetText::getSelectedText()

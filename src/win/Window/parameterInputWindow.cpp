@@ -46,7 +46,7 @@ void ParameterInputWindow::CreateInputWindow()
 
 	isDialogOpen = true;
 	input = new GUI::InputField(hInstance, 0, 0, 200, 20, hwnd);
-	std::wstring command = hGetText.getSelectedText();
+	std::wstring& command = hGetText.getSelectedText();
 	input->setInput(command);
 
 	SetFocus(input->getHwnd());
@@ -60,7 +60,7 @@ LRESULT CALLBACK ParameterInputWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM w
 
 	switch (uMsg) {
 	case WM_CREATE:
-		// Создаем поле ввода
+		
 	   /* hEdit = CreateWindowEx(0, "EDIT", NULL,
 			WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
 			0, 0, 200, 20, hwnd, NULL, NULL, NULL);*/
@@ -124,7 +124,7 @@ LRESULT CALLBACK ParameterInputWindow::LowLevelKeyboardProc(int nCode, WPARAM wP
 							}
 						}
 						else {
-							firstPressTimeParameterInput = currentTime; // Обновляем время первого нажатия
+							firstPressTimeParameterInput = currentTime; 
 						}
 					}
 				}
@@ -132,10 +132,10 @@ LRESULT CALLBACK ParameterInputWindow::LowLevelKeyboardProc(int nCode, WPARAM wP
 			else
 			{
 				if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
-					if (pKeyboard->vkCode == ConfigManager::getInstance().getConfig().keySendCommandParameter1) { // Код для 'A'
+					if (pKeyboard->vkCode == ConfigManager::getInstance().getConfig().keySendCommandParameter1) { 
 						g_ParameterInputWindowInstance->keyA_pressed = true;
 					}
-					if (pKeyboard->vkCode == ConfigManager::getInstance().getConfig().keySendCommandParameter2) { // Код для 'B'
+					if (pKeyboard->vkCode == ConfigManager::getInstance().getConfig().keySendCommandParameter2) { 
 						g_ParameterInputWindowInstance->keyB_pressed = true;
 					}
 				}

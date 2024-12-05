@@ -77,7 +77,6 @@ LRESULT CALLBACK ChooseFolder::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, L
 
 	switch (uMsg) {
 	case WM_CREATE:
-		// Создаем поле ввода
 	   /* hEdit = CreateWindowEx(0, "EDIT", NULL,
 			WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
 			0, 0, 200, 20, hwnd, NULL, NULL, NULL);*/
@@ -176,7 +175,6 @@ LRESULT CALLBACK ChooseFolder::LowLevelKeyboardProc(int nCode, WPARAM wParam, LP
 						g_ChooseFolderInstance->hTerminal.sendCommandToCMD(L"cd \"" + folderPath + L"\"\n");
 						g_ChooseFolderInstance->hTerminal.sendCommandToCMD(L"cd /d \"" + folderPath + L"\"\n");
 					}
-					// Âûïîëíèòå íóæíîå äåéñòâèå
 				}
 			}
 		}
