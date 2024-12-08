@@ -66,14 +66,25 @@ src/main.cpp
 src/application.h
 src/version.h
 src/linux/application.cpp
+src/linux/x11/main_xlib.h
+src/linux/x11/main_xlib.cpp
+src/linux/x11/xlib_helper.cpp
+src/linux/x11/xlib_helper.h
+src/linux/x11/ParameterInputWindow.h
+src/linux/x11/ParameterInputWindow.cpp
 )
 
 if(LINUX)
-  find_package(X11)
+  find_package(X11 REQUIRED)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(GTK REQUIRED gtk+-3.0)
   add_executable(TerminalsThisWay ${SourcesLinux})
-  target_link_libraries(TerminalsThisWay ${X11_LIBRARIES})
-  target_include_directories(TerminalsThisWay PRIVATE ${X11_INCLUDE_DIR})
+  target_link_libraries(TerminalsThisWay PRIVATE ${X11_LIBRARIES} ${GTK_LIBRARIES})
+  target_compile_options(TerminalsThisWay PRIVATE ${GTK_CFLAGS_OTHER})
+  target_include_directories(TerminalsThisWay PRIVATE ${X11_INCLUDE_DIR} ${GTK_INCLUDE_DIRS})
+  target_link_directories(TerminalsThisWay PRIVATE ${GTK_LIBRARY_DIRS})
 endif()
+
 if(WIN32)
     list(APPEND SourcesWin ${APP_ICON_RESOURCE_WINDOWS})
     add_executable(TerminalsThisWay ${SourcesWin})
