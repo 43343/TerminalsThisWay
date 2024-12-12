@@ -1,52 +1,27 @@
 #pragma once
-#include <X11/Xlib.h>
-#include <X11/keysym.h>
-#include <X11/Xlocale.h>
 #include <iostream>
 #include <cstring>
 #include <chrono>
+#include <thread>
+#include <atomic>
+#include <mutex>
+#include <condition_variable>
 
 class ParameterInputWindow
 {
 public:
-  ParameterInputWindow(Display* display);
-  ~ParameterInputWindow();
-  void show(int x, int y);
-  void hide();
-  void handleEvent(XEvent& event);
-  void update();
-  bool isVisible() const;
+    ParameterInputWindow();
+    ~ParameterInputWindow();
+    void create(int x, int y);
+    void destroy();
+    bool isVisible();
 private:
-  Display* display;
-  int screen;
-  Window window;
-  GC gc;
-  std::string inputText;
-  bool visible;
-  
-  void handleExpose();
-  void handleKeyPress(XEvent& event);
-  void handleButtonPress(XEvent& event);
-  void handleButtonRelease(XEvent& event);
-  void handleMotionNotify(XEvent& event);
-  void handleSelectionRequest(XEvent& event);
-  void copyToClipboard();
-  void pasteFromClipboard();
-
-
-  XIM xim;
-  XIC xic;
-
-  Cursor enterNotifyCursor;
-
-  bool cursorVisible = true;
-  std::chrono::steady_clock::time_point lastBlinkTime;
-  const std::chrono::milliseconds blinkInterval{500};
-
-  int selectionStart = 0;
-  int selectionEnd = 0;
-  bool selecting = false;
-  std::string clipboardText;
-  Pixmap backBuffer;
+    bool m_visible = false;
+    std::thread m_thread;
+    std::atomic<bool> m_running;
+    std::mutex m_mutex;
+    std::condition_variable m_condition;
+    int m_x;
+    int m_y;
+    void window(int x, int y);
 };
-

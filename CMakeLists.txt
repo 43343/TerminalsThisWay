@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.16)
+make_minimum_required(VERSION 3.16)
 
-project(TerminalsThisWay VERSION 0.0.4 LANGUAGES CXX)
+project(TerminalsThisWay VERSION 0.0.3 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -19,7 +19,7 @@ configure_file(
      "../src/version.h"
    )
 
-set(SourcesWin
+   set(SourcesWin
     src/main.cpp
     src/application.h
     src/win/application.cpp
@@ -53,8 +53,8 @@ set(SourcesWin
     src/win/Utility/utility.cpp
     src/win/Utility/utility.h
     src/win/Utility/json.hpp
-    src/win/GetText.cpp
-    src/win/GetText.h
+    src/win/uiAutomation.cpp
+    src/win/uiAutomation.h
     src/win/Window/chooseFolder.cpp
     src/win/Window/chooseFolder.h
     src/win/terminal.cpp
@@ -62,24 +62,29 @@ set(SourcesWin
     src/version.h
 )
 set(SourcesLinux
-    src/main.cpp
-    src/application.h
-    src/version.h
-    src/linux/application.cpp
-    src/linux/x11/main_xlib.src
-    src/linux/x11/main_xlib.h
-    src/linux/x11/ParameterInputWindow.cpp
-    src/linux/x11/ParameterInputWindow.h
-    src/linux/x11/xlib_helper.h
-    src/linux/x11/xlib_helper.cpp
+src/main.cpp
+src/application.h
+src/version.h
+src/linux/application.cpp
+src/linux/x11/main_xlib.h
+src/linux/x11/main_xlib.cpp
+src/linux/x11/xlib_helper.cpp
+src/linux/x11/xlib_helper.h
+src/linux/x11/ParameterInputWindow.h
+src/linux/x11/ParameterInputWindow.cpp
 )
 
 if(LINUX)
-   find_package(X11)
-   add_executable(TerminalsThisWay ${SourcesLinux})
-   target_link_libraries(TerminalsThisWay ${X11_LIBRARIES})
-   target_include_directories(TerminalsThisWay PRIVATE ${X11_INCLUDE_DIR})
+  find_package(X11 REQUIRED)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(GTK REQUIRED gtk+-3.0)
+  add_executable(TerminalsThisWay ${SourcesLinux})
+  target_link_libraries(TerminalsThisWay PRIVATE ${X11_LIBRARIES} ${GTK_LIBRARIES})
+  target_compile_options(TerminalsThisWay PRIVATE ${GTK_CFLAGS_OTHER})
+  target_include_directories(TerminalsThisWay PRIVATE ${X11_INCLUDE_DIR} ${GTK_INCLUDE_DIRS})
+  target_link_directories(TerminalsThisWay PRIVATE ${GTK_LIBRARY_DIRS})
 endif()
+
 if(WIN32)
     list(APPEND SourcesWin ${APP_ICON_RESOURCE_WINDOWS})
     add_executable(TerminalsThisWay ${SourcesWin})
