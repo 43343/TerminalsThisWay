@@ -105,8 +105,8 @@ LRESULT CALLBACK ChooseFolder::LowLevelKeyboardProc(int nCode, WPARAM wParam, LP
 				}
 				if (!folderPath.empty())
 				{
-					g_ChooseFolderInstance->hTerminal.sendCommandToCMD(L"cd \"" + folderPath + L"\"\n");
-					g_ChooseFolderInstance->hTerminal.sendCommandToCMD(L"cd /d \"" + folderPath + L"\"\n");
+					g_ChooseFolderInstance->hTerminal.sendCommandToCMD(L"cd \"" + folderPath + L"\"", true);
+					g_ChooseFolderInstance->hTerminal.sendCommandToCMD(L"cd /d \"" + folderPath + L"\"", true);
 				}
 			}
 		}
@@ -132,8 +132,8 @@ LRESULT CALLBACK ChooseFolder::LowLevelKeyboardProc(int nCode, WPARAM wParam, LP
 							}
 							if (!folderPath.empty())
 							{
-								g_ChooseFolderInstance->hTerminal.sendCommandToCMD(L"cd \"" + folderPath + L"\"\n");
-								g_ChooseFolderInstance->hTerminal.sendCommandToCMD(L"cd /d \"" + folderPath + L"\"\n");
+								g_ChooseFolderInstance->hTerminal.sendCommandToCMD(L"cd \"" + folderPath + L"\"", true);
+								g_ChooseFolderInstance->hTerminal.sendCommandToCMD(L"cd /d \"" + folderPath + L"\"", true);
 							}
 							g_ChooseFolderInstance->firstPressDetected = false;
 						}
@@ -172,8 +172,8 @@ LRESULT CALLBACK ChooseFolder::LowLevelKeyboardProc(int nCode, WPARAM wParam, LP
 					}
 					if (!folderPath.empty())
 					{
-						g_ChooseFolderInstance->hTerminal.sendCommandToCMD(L"cd \"" + folderPath + L"\"\n");
-						g_ChooseFolderInstance->hTerminal.sendCommandToCMD(L"cd /d \"" + folderPath + L"\"\n");
+						g_ChooseFolderInstance->hTerminal.sendCommandToCMD(L"cd \"" + folderPath + L"\"", true);
+						g_ChooseFolderInstance->hTerminal.sendCommandToCMD(L"cd /d \"" + folderPath + L"\"", true);
 					}
 				}
 			}

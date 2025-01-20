@@ -86,7 +86,7 @@ LRESULT CALLBACK ParameterInputWindow::LowLevelKeyboardProc(int nCode, WPARAM wP
 				if (!command.empty())
 				{
 					command += L"\n";
-					g_ParameterInputWindowInstance->hTerminal.sendCommandToCMD(command);
+					g_ParameterInputWindowInstance->hTerminal.sendCommandToCMD(command, true);
 				}
 				DestroyWindow(g_ParameterInputWindowInstance->hwnd);
 				g_ParameterInputWindowInstance->isDialogOpen = false;

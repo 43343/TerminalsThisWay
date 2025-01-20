@@ -19,7 +19,6 @@ Settings::~Settings()
 	delete sendCommandParameterInput;
 	delete chooseFolderText;
 	delete chooseFolderInput;
-	delete warningText;
 	delete saveBtn;
 	delete cancelBtn;
 }
@@ -60,10 +59,6 @@ bool Settings::createWindow() {
 	generalText = new GUI::Text(hInstance, hwnd, 10, 30, 260, 20);
 
 	pathToTerminalInput = new GUI::InputField(hInstance, 325, 60, 230, 20, hwnd);
-	pathToTerminalInput->setCallback([&]() {
-		warningText->setVisible(true);
-		//warningText->setColor("FF0000");
-		});
 	pathToTerminalText = new GUI::Text(hInstance, hwnd, 10, 60, 230, 20);
 
 
@@ -83,10 +78,6 @@ bool Settings::createWindow() {
 
 	chooseFolderText = new GUI::Text(hInstance, hwnd, 10, 240, 230, 20);
 	chooseFolderInput = new GUI::InputKeyBind(hInstance, hwnd, 325, 240, 230, 20);
-
-	warningText = new GUI::Text(hInstance, hwnd, 10, 270, 500, 20);
-	//warningText->setColor("FF0000");
-	warningText->setVisible(false);
 
 	saveBtn = new GUI::Button(hInstance, hwnd, 190, 290, 180, 20);
 	saveBtn->setCallback([&]() {
@@ -122,7 +113,6 @@ void Settings::setText() {
 	sendCommandText->setText("Send command:");
 	sendCommandParameterText->setText("Send command (Change parameter):");
 	chooseFolderText->setText("Choose folder:");
-	warningText->setText("To apply the settings, you need to close the current terminal process");
 	saveBtn->setText("Save");
 	cancelBtn->setText("Cancel");
 	InvalidateRect(hwnd, NULL, TRUE);

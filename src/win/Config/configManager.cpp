@@ -24,7 +24,7 @@ void ConfigManager::generateConfigFile(const std::wstring& filePath)
 	
 	std::ofstream outfile(filePath);
 	if (outfile.is_open()) {
-		outfile << "PathToTerminal=C:\\Program Files\\PowerShell\\7\\pwsh.exe\n";
+		outfile << "PathToTerminal=C:\\WINDOWS\\system32\\cmd.exe\n";
 		outfile << "LaunchByDefault=0\n";
 		outfile << "RunAsAdministrator=0\n";
 		outfile << "SendCommand=Insert\n";

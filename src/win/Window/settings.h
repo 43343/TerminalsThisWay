@@ -46,8 +46,6 @@ private:
     GUI::Text* chooseFolderText;
     GUI::InputKeyBind* chooseFolderInput;
 
-    GUI::Text* warningText;
-
     GUI::Button* saveBtn;
     GUI::Button* cancelBtn;
 

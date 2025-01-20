@@ -2,13 +2,13 @@
 #include <iostream>
 #include "Config//configManager.h"
 
-GetText* g_UIAutomationInstance = nullptr;
+GetText* g_GetTextInstance = nullptr;
 auto firstPressTime = std::chrono::steady_clock::now();
 
 GetText::GetText(Terminal* cmd) : hTerminal(cmd)
 {
 	hHook = SetWindowsHookEx(WH_KEYBOARD_LL, LowLevelKeyboardProc, NULL, 0);
-	g_UIAutomationInstance = this;
+	g_GetTextInstance = this;
 }
 GetText::~GetText()
 {
@@ -121,11 +121,10 @@ LRESULT CALLBACK GetText::LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM 
 		{
 			if ((wParam == WM_KEYUP || wParam == WM_SYSKEYUP) && pKeyboard->vkCode == ConfigManager::getInstance().getConfig().keySendCommand1)
 			{
-				std::wstring command = g_UIAutomationInstance->getSelectedText();
+				std::wstring command = g_GetTextInstance->getSelectedText();
 				if (!command.empty())
 				{
-					command += L"\r\n";
-					g_UIAutomationInstance->hTerminal->sendCommandToCMD(command);
+					g_GetTextInstance->hTerminal->sendCommandToCMD(command, true);
 				}
 			}
 		}
@@ -136,21 +135,20 @@ LRESULT CALLBACK GetText::LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM 
 				if ((wParam == WM_KEYUP || wParam == WM_SYSKEYUP) && pKeyboard->vkCode == ConfigManager::getInstance().getConfig().keySendCommand1)
 				{
 					auto currentTime = std::chrono::steady_clock::now();
-					if (!g_UIAutomationInstance->firstPressDetected) {
-						g_UIAutomationInstance->firstPressDetected = true;
+					if (!g_GetTextInstance->firstPressDetected) {
+						g_GetTextInstance->firstPressDetected = true;
 						firstPressTime = currentTime;
 					}
 					else {
 						auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - firstPressTime).count();
 
 						if (duration <= DOUBLE_PRESS_INTERVAL_MS) {
-							std::wstring command = g_UIAutomationInstance->getSelectedText();
+							std::wstring command = g_GetTextInstance->getSelectedText();
 							if (!command.empty())
 							{
-								command += L"\r\n";
-								g_UIAutomationInstance->hTerminal->sendCommandToCMD(command);
+								g_GetTextInstance->hTerminal->sendCommandToCMD(command, true);
 							}
-							g_UIAutomationInstance->firstPressDetected = false;
+							g_GetTextInstance->firstPressDetected = false;
 						}
 						else {
 							firstPressTime = currentTime; 
@@ -162,32 +160,31 @@ LRESULT CALLBACK GetText::LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM 
 			{
 				if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
 					if (pKeyboard->vkCode == ConfigManager::getInstance().getConfig().keySendCommand1) { 
-						g_UIAutomationInstance->keyA_pressed = true;
+						g_GetTextInstance->keyA_pressed = true;
 					}
 					if (pKeyboard->vkCode == ConfigManager::getInstance().getConfig().keySendCommand2) { 
-						g_UIAutomationInstance->keyB_pressed = true;
+						g_GetTextInstance->keyB_pressed = true;
 					}
 				}
 				else if (wParam == WM_KEYUP || wParam == WM_SYSKEYUP) {
 					if (pKeyboard->vkCode == ConfigManager::getInstance().getConfig().keySendCommand1) {
-						g_UIAutomationInstance->keyA_pressed = false;
+						g_GetTextInstance->keyA_pressed = false;
 					}
 					if (pKeyboard->vkCode == ConfigManager::getInstance().getConfig().keySendCommand2) {
-						g_UIAutomationInstance->keyB_pressed = false;
+						g_GetTextInstance->keyB_pressed = false;
 					}
 				}
 
-				if (g_UIAutomationInstance->keyA_pressed && g_UIAutomationInstance->keyB_pressed) {
-					std::wstring command = g_UIAutomationInstance->getSelectedText();
+				if (g_GetTextInstance->keyA_pressed && g_GetTextInstance->keyB_pressed) {
+					std::wstring command = g_GetTextInstance->getSelectedText();
 					if (!command.empty())
 					{
-						command += L"\r\n";
-						g_UIAutomationInstance->hTerminal->sendCommandToCMD(command);
+						g_GetTextInstance->hTerminal->sendCommandToCMD(command, true);
 					}
 				}
 			}
 		}
 	}
 
-	return CallNextHookEx(g_UIAutomationInstance->hHook, nCode, wParam, lParam);
+	return CallNextHookEx(g_GetTextInstance->hHook, nCode, wParam, lParam);
 }

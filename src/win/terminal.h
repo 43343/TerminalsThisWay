@@ -8,13 +8,11 @@ class Terminal
 {
 public:
 	Terminal();
-	void createProcessCMD(const std::wstring& path);
-	void sendCommandToCMD(const std::wstring& command);
+	void sendCommandToCMD(const std::wstring& command, const bool& createCmd);
 private:
-	HANDLE CMD_READ, PARENT_WRITE;
 	DWORD startedProcessIDs = 0;
 	void handle_cleanup(STARTUPINFOW startupinfo, PROCESS_INFORMATION  processinfo);
 	bool IsProcessRunning(DWORD processID);
+	void createProcessCMD(const std::wstring& path);
 	std::wstring currentPathTerminal;
-	std::string utf16ToUtf8(const std::wstring& utf16Str);
 };

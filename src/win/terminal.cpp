@@ -1,5 +1,7 @@
+﻿#define _WIN32_WINNT 0x0A00
 #include "terminal.h"
 #include <windows.h>
+#include <consoleapi2.h>
 #include <tlhelp32.h>
 #include <codecvt>
 #include <iostream>
@@ -31,35 +33,27 @@ bool Terminal::IsProcessRunning(DWORD processID) {
 
 void Terminal::createProcessCMD(const std::wstring& path)
 {
-	if (currentPathTerminal != path && startedProcessIDs != 0)
-	{
-		startedProcessIDs = 0;
-		std::string exitCommand = "exit\n";
-		WriteFile(PARENT_WRITE, exitCommand.c_str(), strlen(exitCommand.c_str()), NULL, NULL);
+	std::wstring pathToTerminalQuotes = path;
+	size_t pos = 0;
+	while ((pos = pathToTerminalQuotes.find(L'"', pos)) != std::wstring::npos) {
+		pathToTerminalQuotes.erase(pos, 1);
 	}
-	currentPathTerminal = path;
+	if (currentPathTerminal != pathToTerminalQuotes && startedProcessIDs != 0)
+	{
+		sendCommandToCMD(L"exit", false);
+		startedProcessIDs = 0;
+	}
+	currentPathTerminal = pathToTerminalQuotes;
 	if (IsProcessRunning(startedProcessIDs) && startedProcessIDs != 0) {
 		std::cout << "A terminal process is already running." << std::endl;
-		return; 
+		return;
 	}
+	FreeConsole();
 
-	STARTUPINFOW PSTARTUPINFO;
-	PROCESS_INFORMATION PPROCESSINFO;
+	STARTUPINFOW PSTARTUPINFO = { 0 };
+	PROCESS_INFORMATION PPROCESSINFO = { 0 };
 	SECURITY_ATTRIBUTES SECURITYATTR;
-
-	SECURITYATTR.nLength = sizeof(SECURITY_ATTRIBUTES);
-	SECURITYATTR.bInheritHandle = TRUE;
-	SECURITYATTR.lpSecurityDescriptor = NULL;
-
-	CreatePipe(&CMD_READ, &PARENT_WRITE, &SECURITYATTR, 0);
-
-	ZeroMemory(&PSTARTUPINFO, sizeof(STARTUPINFO));
-
-	PSTARTUPINFO.cb = sizeof(STARTUPINFO);
-	PSTARTUPINFO.hStdInput = CMD_READ;
-	PSTARTUPINFO.dwFlags |= STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
-	PSTARTUPINFO.wShowWindow = SW_SHOWNORMAL;
-	BOOL success = CreateProcessW(path.c_str(),
+	BOOL success = CreateProcessW(pathToTerminalQuotes.c_str(),
 		NULL,
 		NULL,
 		NULL,
@@ -72,48 +66,76 @@ void Terminal::createProcessCMD(const std::wstring& path)
 
 	startedProcessIDs = PPROCESSINFO.dwProcessId;
 
-	//WaitForSingleObject(hProcessCMD, INFINITE);
-
-	handle_cleanup(PSTARTUPINFO, PPROCESSINFO);
-	std::string command = "chcp 65001\r\n";
-	DWORD bytesToWrite = static_cast<DWORD>(command.size());
-	WriteFile(PARENT_WRITE, command.c_str(), bytesToWrite, NULL, NULL);
+	Sleep(2000);
+	sendCommandToCMD(L"chcp 65001", false);
 }
 
 void Terminal::handle_cleanup(STARTUPINFOW startupinfo, PROCESS_INFORMATION  processinfo)
 {
-	if (!CloseHandle(startupinfo.hStdInput)) printf("[-] Could not close stdin handle\n");
 	if (!CloseHandle(processinfo.hProcess)) printf("[-] Could not close process handle\n");
 	if (!CloseHandle(processinfo.hThread)) printf("[-] Could not close thread handle\n");
 }
-std::string Terminal::utf16ToUtf8(const std::wstring& utf16Str)
+void Terminal::sendCommandToCMD(const std::wstring& command, const bool& createCmd)
 {
-	if (utf16Str.empty()) {
-		return std::string();
+	if (createCmd)
+	{
+		createProcessCMD(ConfigManager::getInstance().getConfig().pathToTerminal);
 	}
+	if (IsProcessRunning(startedProcessIDs) && startedProcessIDs != 0)
+	{
+		FreeConsole();
+		if (!AttachConsole(startedProcessIDs))
+		{
+			std::cerr << "ErrorAttached\r\n";
+			MessageBoxA(NULL, "Couldn't connect to the terminal.", "Error", MB_ICONERROR | MB_OK);
+#ifdef _DEBUG
+			if (AllocConsole())
+			{
+				freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
+				freopen_s((FILE**)stderr, "CONOUT$", "w", stderr);
+				freopen_s((FILE**)stdin, "CONIN$", "r", stdin);
 
-	
-	int utf8Size = WideCharToMultiByte(CP_UTF8, 0, utf16Str.c_str(), -1, nullptr, 0, nullptr, nullptr);
-	if (utf8Size <= 0) {
-		throw std::runtime_error("Failed to calculate UTF-8 string size.");
-	}
+				std::cerr << "ErrorAttached\r\n";
+			}
+#endif
+			return;
+		}
+		HANDLE hConsoleInput = GetStdHandle(STD_INPUT_HANDLE);
 
-	
-	std::string utf8Str(utf8Size - 1, '0'); 
-	WideCharToMultiByte(CP_UTF8, 0, utf16Str.c_str(), -1, &utf8Str[0], utf8Size, nullptr, nullptr);
+		INPUT_RECORD inputRecords[256];
+		DWORD eventsWritten;
+		size_t len = command.length();
+		for (size_t i = 0; i < len; ++i) {
+			inputRecords[i].EventType = KEY_EVENT;
+			inputRecords[i].Event.KeyEvent.bKeyDown = TRUE;
+			inputRecords[i].Event.KeyEvent.dwControlKeyState = 0;
+			inputRecords[i].Event.KeyEvent.uChar.UnicodeChar = command[i];
+			inputRecords[i].Event.KeyEvent.wRepeatCount = 1;
+			inputRecords[i].Event.KeyEvent.wVirtualKeyCode = 0;
+			inputRecords[i].Event.KeyEvent.wVirtualScanCode = 0;
+		}
+		inputRecords[len].EventType = KEY_EVENT;
+		inputRecords[len].Event.KeyEvent.bKeyDown = TRUE;
+		inputRecords[len].Event.KeyEvent.dwControlKeyState = 0;
+		inputRecords[len].Event.KeyEvent.uChar.UnicodeChar = '\r';
+		inputRecords[len].Event.KeyEvent.wRepeatCount = 1;
+		inputRecords[len].Event.KeyEvent.wVirtualKeyCode = VK_RETURN;
+		inputRecords[len].Event.KeyEvent.wVirtualScanCode = 0;
+		inputRecords[len + 1] = inputRecords[len];
+		inputRecords[len + 1].Event.KeyEvent.bKeyDown = FALSE;
+		if (!WriteConsoleInputW(hConsoleInput, inputRecords, len + 2, &eventsWritten)) {
+			std::cerr << "Failed to write to console input buffer." << std::endl;
+		}
+		FreeConsole();
+#ifdef _DEBUG
+		if (AllocConsole())
+		{
+			freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
+			freopen_s((FILE**)stderr, "CONOUT$", "w", stderr);
+			freopen_s((FILE**)stdin, "CONIN$", "r", stdin);
 
-	return utf8Str;
-}
-void Terminal::sendCommandToCMD(const std::wstring& command)
-{
-	createProcessCMD(ConfigManager::getInstance().getConfig().pathToTerminal);
-	std::string utf8Command = utf16ToUtf8(command);
-	DWORD bytesToWrite = static_cast<DWORD>(utf8Command.size());
-
-	DWORD bytesWritten = 0;
-
-	BOOL result = WriteFile(PARENT_WRITE, utf8Command.c_str(), bytesToWrite, &bytesWritten, NULL);
-	if (!result || bytesWritten != bytesToWrite) {
-		throw std::runtime_error("Failed to write command to CMD.");
+			std::cout << "Standard console restored." << std::endl;
+		}
+#endif
 	}
 } 

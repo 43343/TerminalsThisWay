@@ -65,7 +65,7 @@ Application::Application(int argc, char* argv[]) {
 	Terminal* cmdTerminal = new Terminal();
 	if (config.runAsAdministrator && runAsAdministrator())
 	{
-		cmdTerminal->sendCommandToCMD(L"exit\r\n");
+		cmdTerminal->sendCommandToCMD(L"exit", false);
 		PostQuitMessage(0);
 	}
 

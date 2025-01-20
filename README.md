@@ -9,6 +9,10 @@ The purposes for which you may need TerminalsThisWay:
 
 # Install
 ## Windows
+### System requirements
+
++ [Windows 10 or never](https://www.microsoft.com/ru-ru/software-download/windows10)
++ [Microsoft Visual c++ 2015-2022](https://learn.microsoft.com/ru-ru/cpp/windows/latest-supported-vc-redist?view=msvc-170)
 
 You can download the Windows version below:
 
