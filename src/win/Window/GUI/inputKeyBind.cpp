@@ -38,19 +38,6 @@ namespace GUI {
 	std::wstring InputKeyBind::getText() {
 		return keySequence;
 	}
-
-	void InputKeyBind::RemoveSpaces(wchar_t* str) {
-		wchar_t* p1 = str; 
-		wchar_t* p2 = str; 
-
-		while (*p1 != L'0') { 
-			if (*p1 != L' ') { 
-				*p2++ = *p1;   
-			}
-			p1++; 
-		}
-		*p2 = L'0'; 
-	}
 	void InputKeyBind::GetEnglishKeyNameText(WPARAM wParam, LPARAM lParam, wchar_t* keyName, int keyNameSize)
 	{
 		DWORD vkCode = static_cast<DWORD>(wParam);
@@ -123,9 +110,8 @@ namespace GUI {
 			if (btnCount == 1) keyBind->keySequence += L" + ";
 			wchar_t keyName[32];
 			keyBind->GetEnglishKeyNameText(wParam, lParam, keyName, sizeof(keyName) / sizeof(wchar_t));
-			keyBind->RemoveSpaces(keyName);
+			std::wcout << "keyAher:" << keyName;
 			keyBind->keySequence += keyName;
-			std::cout << keyBind;
 			std::wcout << L"YES\n";
 			SetWindowTextW(hwnd, keyBind->keySequence.c_str());
 			btnCount++;
@@ -142,7 +128,7 @@ namespace GUI {
 			UpdateWindow(keyBind->parentHwnd);
 			//keyBind->keySequence.clear();
 			std::cout << "LBUTTON";
-			SetWindowTextW(hwnd, L"Нажмите клавишу");
+			SetWindowTextW(hwnd, L"Press the key");
 			btnCount = 0;
 		}
 		return CallWindowProc(keyBind->originalWndProc, hwnd, msg, wParam, lParam);
