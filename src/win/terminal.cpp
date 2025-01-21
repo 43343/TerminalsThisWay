@@ -5,7 +5,6 @@
 #include <tlhelp32.h>
 #include <codecvt>
 #include <iostream>
-#include <fstream>
 #include "Config/configManager.h"
 
 Terminal::Terminal() 
@@ -46,6 +45,7 @@ void Terminal::createProcessCMD(const std::wstring& path)
 	if (currentPathTerminal != pathToTerminalQuotes && startedProcessIDs != 0)
 	{
 		sendCommandToCMD(L"exit", false);
+		Sleep(1000);
 		startedProcessIDs = 0;
 	}
 	currentPathTerminal = pathToTerminalQuotes;
@@ -72,7 +72,6 @@ void Terminal::createProcessCMD(const std::wstring& path)
 	startedProcessIDs = PPROCESSINFO.dwProcessId;
 
 	WaitForSingleObject(PPROCESSINFO.hProcess, 1000);
-	sendCommandToCMD(L"chcp 65001", false);
 }
 
 void Terminal::handle_cleanup(STARTUPINFOW startupinfo, PROCESS_INFORMATION  processinfo)
@@ -96,20 +95,18 @@ void Terminal::commandProcessingLoop() {
 	while (true) {
 		std::unique_lock<std::mutex> lock(queueMutex);
 
-		// Ожидание новой команды или завершения работы
 		cv.wait(lock, [this]() { return !commandQueue.empty() || stopProcessing; });
 
 		if (stopProcessing && commandQueue.empty()) {
-			break; // Завершение работы потока
+			break;
 		}
 
 		std::wstring nextCommand = commandQueue.front();
 		commandQueue.pop();
-		lock.unlock(); // Освобождаем мьютекс перед выполнением команды
+		lock.unlock(); 
 
-		processNextCommand(nextCommand); // Обработка команды
+		processNextCommand(nextCommand); 
 
-		// После выполнения команды проверяем, есть ли еще команды в очереди
 		lock.lock();
 		isBusy = !commandQueue.empty();
 	}
@@ -118,6 +115,7 @@ void Terminal::processNextCommand(const std::wstring& command) {
 	if (IsProcessRunning(startedProcessIDs) && startedProcessIDs != 0) {
 		FreeConsole();
 		if (!AttachConsole(startedProcessIDs)) {
+			MessageBoxA(NULL, "Couldn't connect to the terminal.", "Error", MB_ICONERROR | MB_OK);
 			return;
 		}
 
@@ -157,6 +155,7 @@ void Terminal::processNextCommand(const std::wstring& command) {
 
 bool Terminal::isTerminalReady() {
 	if (!AttachConsole(startedProcessIDs)) {
+		MessageBoxA(NULL, "Couldn't connect to the terminal.", "Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -181,10 +180,5 @@ bool Terminal::isTerminalReady() {
 	FreeConsole();
 
 	std::string output(buffer, charsRead);
-	std::ofstream outFile("console_output.txt", std::ios::app);
-	if (outFile.is_open()) {
-		outFile << output << std::endl;
-		outFile.close();
-	}
 	return output.find(">") != std::string::npos;
 }
