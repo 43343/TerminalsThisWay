@@ -5,11 +5,16 @@
 #include <tlhelp32.h>
 #include <codecvt>
 #include <iostream>
+#include <fstream>
 #include "Config/configManager.h"
 
-Terminal::Terminal() {}
+Terminal::Terminal() 
+{
+	workerThread = std::thread(&Terminal::commandProcessingLoop, this);
+}
 
-bool Terminal::IsProcessRunning(DWORD processID) {
+bool Terminal::IsProcessRunning(DWORD processID) 
+{
 	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 	if (snapshot == INVALID_HANDLE_VALUE) {
 		return false;
@@ -66,7 +71,7 @@ void Terminal::createProcessCMD(const std::wstring& path)
 
 	startedProcessIDs = PPROCESSINFO.dwProcessId;
 
-	Sleep(2000);
+	WaitForSingleObject(PPROCESSINFO.hProcess, 1000);
 	sendCommandToCMD(L"chcp 65001", false);
 }
 
@@ -81,25 +86,41 @@ void Terminal::sendCommandToCMD(const std::wstring& command, const bool& createC
 	{
 		createProcessCMD(ConfigManager::getInstance().getConfig().pathToTerminal);
 	}
-	if (IsProcessRunning(startedProcessIDs) && startedProcessIDs != 0)
 	{
-		FreeConsole();
-		if (!AttachConsole(startedProcessIDs))
-		{
-			std::cerr << "ErrorAttached\r\n";
-			MessageBoxA(NULL, "Couldn't connect to the terminal.", "Error", MB_ICONERROR | MB_OK);
-#ifdef _DEBUG
-			if (AllocConsole())
-			{
-				freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
-				freopen_s((FILE**)stderr, "CONOUT$", "w", stderr);
-				freopen_s((FILE**)stdin, "CONIN$", "r", stdin);
+		std::lock_guard<std::mutex> lock(queueMutex);
+		commandQueue.push(command);
+	}
+	cv.notify_one();
+} 
+void Terminal::commandProcessingLoop() {
+	while (true) {
+		std::unique_lock<std::mutex> lock(queueMutex);
 
-				std::cerr << "ErrorAttached\r\n";
-			}
-#endif
+		// Ожидание новой команды или завершения работы
+		cv.wait(lock, [this]() { return !commandQueue.empty() || stopProcessing; });
+
+		if (stopProcessing && commandQueue.empty()) {
+			break; // Завершение работы потока
+		}
+
+		std::wstring nextCommand = commandQueue.front();
+		commandQueue.pop();
+		lock.unlock(); // Освобождаем мьютекс перед выполнением команды
+
+		processNextCommand(nextCommand); // Обработка команды
+
+		// После выполнения команды проверяем, есть ли еще команды в очереди
+		lock.lock();
+		isBusy = !commandQueue.empty();
+	}
+}
+void Terminal::processNextCommand(const std::wstring& command) {
+	if (IsProcessRunning(startedProcessIDs) && startedProcessIDs != 0) {
+		FreeConsole();
+		if (!AttachConsole(startedProcessIDs)) {
 			return;
 		}
+
 		HANDLE hConsoleInput = GetStdHandle(STD_INPUT_HANDLE);
 
 		INPUT_RECORD inputRecords[256];
@@ -123,19 +144,47 @@ void Terminal::sendCommandToCMD(const std::wstring& command, const bool& createC
 		inputRecords[len].Event.KeyEvent.wVirtualScanCode = 0;
 		inputRecords[len + 1] = inputRecords[len];
 		inputRecords[len + 1].Event.KeyEvent.bKeyDown = FALSE;
+
 		if (!WriteConsoleInputW(hConsoleInput, inputRecords, len + 2, &eventsWritten)) {
 			std::cerr << "Failed to write to console input buffer." << std::endl;
 		}
 		FreeConsole();
-#ifdef _DEBUG
-		if (AllocConsole())
-		{
-			freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
-			freopen_s((FILE**)stderr, "CONOUT$", "w", stderr);
-			freopen_s((FILE**)stdin, "CONIN$", "r", stdin);
-
-			std::cout << "Standard console restored." << std::endl;
+		while (!isTerminalReady()) {
+			Sleep(100);
 		}
-#endif
 	}
-} 
+}
+
+bool Terminal::isTerminalReady() {
+	if (!AttachConsole(startedProcessIDs)) {
+		return false;
+	}
+
+	HANDLE hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+	CHAR buffer[4096];
+	DWORD charsRead;
+
+	COORD coord = { 0, 0 };
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	if (!GetConsoleScreenBufferInfo(hConsoleOutput, &csbi)) {
+		FreeConsole();
+		return false;
+	}
+
+	DWORD consoleSize = csbi.dwSize.X * csbi.dwSize.Y;
+
+	if (!ReadConsoleOutputCharacterA(hConsoleOutput, buffer, consoleSize, coord, &charsRead)) {
+		FreeConsole();
+		return false;
+	}
+
+	FreeConsole();
+
+	std::string output(buffer, charsRead);
+	std::ofstream outFile("console_output.txt", std::ios::app);
+	if (outFile.is_open()) {
+		outFile << output << std::endl;
+		outFile.close();
+	}
+	return output.find(">") != std::string::npos;
+}

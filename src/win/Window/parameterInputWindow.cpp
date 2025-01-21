@@ -85,7 +85,6 @@ LRESULT CALLBACK ParameterInputWindow::LowLevelKeyboardProc(int nCode, WPARAM wP
 				std::wstring command = g_ParameterInputWindowInstance->input->getInput();
 				if (!command.empty())
 				{
-					command += L"\n";
 					g_ParameterInputWindowInstance->hTerminal.sendCommandToCMD(command, true);
 				}
 				DestroyWindow(g_ParameterInputWindowInstance->hwnd);
