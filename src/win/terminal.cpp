@@ -53,7 +53,6 @@ void Terminal::createProcessCMD(const std::wstring& path)
 		std::cout << "A terminal process is already running." << std::endl;
 		return;
 	}
-	FreeConsole();
 
 	STARTUPINFOW PSTARTUPINFO = { 0 };
 	PROCESS_INFORMATION PPROCESSINFO = { 0 };
@@ -62,7 +61,7 @@ void Terminal::createProcessCMD(const std::wstring& path)
 		NULL,
 		NULL,
 		NULL,
-		TRUE,
+		FALSE,
 		CREATE_NEW_CONSOLE,
 		NULL,
 		NULL,
@@ -95,9 +94,9 @@ void Terminal::commandProcessingLoop() {
 	while (true) {
 		std::unique_lock<std::mutex> lock(queueMutex);
 
-		cv.wait(lock, [this]() { return !commandQueue.empty() || stopProcessing; });
+		cv.wait(lock, [this]() { return !commandQueue.empty(); });
 
-		if (stopProcessing && commandQueue.empty()) {
+		if (commandQueue.empty()) {
 			break;
 		}
 
@@ -108,11 +107,12 @@ void Terminal::commandProcessingLoop() {
 		processNextCommand(nextCommand); 
 
 		lock.lock();
-		isBusy = !commandQueue.empty();
 	}
 }
 void Terminal::processNextCommand(const std::wstring& command) {
+
 	if (IsProcessRunning(startedProcessIDs) && startedProcessIDs != 0) {
+		
 		FreeConsole();
 		if (!AttachConsole(startedProcessIDs)) {
 			MessageBoxA(NULL, "Couldn't connect to the terminal.", "Error", MB_ICONERROR | MB_OK);
@@ -141,11 +141,13 @@ void Terminal::processNextCommand(const std::wstring& command) {
 		inputRecords[len].Event.KeyEvent.wVirtualScanCode = 0;
 		inputRecords[len + 1] = inputRecords[len];
 		inputRecords[len + 1].Event.KeyEvent.bKeyDown = FALSE;
-
+		if (!SetConsoleCtrlHandler(IgnoreCtrlHandler, TRUE)) {
+			MessageBoxA(NULL, "Failed to set control handler.", "Error", MB_ICONERROR | MB_OK);
+			return;
+		}
 		if (!WriteConsoleInputW(hConsoleInput, inputRecords, len + 2, &eventsWritten)) {
 			std::cerr << "Failed to write to console input buffer." << std::endl;
 		}
-		FreeConsole();
 		while (!isTerminalReady() && IsProcessRunning(startedProcessIDs)) {
 			Sleep(100);
 		}
@@ -156,12 +158,6 @@ void Terminal::processNextCommand(const std::wstring& command) {
 }
 
 bool Terminal::isTerminalReady() {
-	if (!AttachConsole(startedProcessIDs)) {
-		if (GetLastError() != ERROR_ACCESS_DENIED) {
-			MessageBoxA(NULL, "Failed to attach console.", "Error", MB_ICONERROR | MB_OK);
-			return false;
-		}
-	}
 	HANDLE hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hConsoleOutput == INVALID_HANDLE_VALUE) {
 		MessageBoxA(NULL, "Invalid console output handle.", "Error", MB_ICONERROR | MB_OK);
@@ -183,7 +179,35 @@ bool Terminal::isTerminalReady() {
 		MessageBoxA(NULL, "ReadConsoleOutputCharacterW.", "Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
-
+	FreeConsole();
 	std::string output(buffer, charsRead);
 	return output.find(">") != std::string::npos;
+}
+
+BOOL WINAPI Terminal::IgnoreCtrlHandler(DWORD dwCtrlType) {
+	switch (dwCtrlType)
+	{
+	case CTRL_C_EVENT:
+		std::cout << "Control-C event detected! Performing cleanup..." << std::endl;
+		return TRUE;
+
+	case CTRL_BREAK_EVENT:
+		std::cout << "Control-Break event detected!" << std::endl;
+		return TRUE;
+
+	case CTRL_CLOSE_EVENT:
+		std::cout << "Console window closing event detected!" << std::endl;
+		return TRUE;
+
+	case CTRL_LOGOFF_EVENT:
+		std::cout << "User is logging off!" << std::endl;
+		return TRUE;
+
+	case CTRL_SHUTDOWN_EVENT:
+		std::cout << "System is shutting down!" << std::endl;
+		return TRUE;
+
+	default:
+		return FALSE;
+	}
 }

@@ -4,7 +4,6 @@
 #include <vector>
 #include <queue>
 #include <thread>
-#include <atomic>
 #include <condition_variable>
 #include <mutex>
 
@@ -16,8 +15,6 @@ public:
 private:
 	std::queue<std::wstring> commandQueue;
 	std::condition_variable cv;
-	std::atomic<bool> isBusy = false;
-	std::atomic<bool> stopProcessing = false;
 	std::thread workerThread;
 	std::mutex queueMutex;
 	void commandProcessingLoop();
@@ -28,4 +25,5 @@ private:
 	bool IsProcessRunning(DWORD processID);
 	void createProcessCMD(const std::wstring& path);
 	std::wstring currentPathTerminal;
+	static BOOL WINAPI IgnoreCtrlHandler(DWORD dwCtrlType);
 };
