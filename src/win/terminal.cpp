@@ -118,7 +118,6 @@ void Terminal::processNextCommand(const std::wstring& command) {
 			MessageBoxA(NULL, "Couldn't connect to the terminal.", "Error", MB_ICONERROR | MB_OK);
 			return;
 		}
-
 		HANDLE hConsoleInput = GetStdHandle(STD_INPUT_HANDLE);
 
 		INPUT_RECORD inputRecords[256];
@@ -147,37 +146,43 @@ void Terminal::processNextCommand(const std::wstring& command) {
 			std::cerr << "Failed to write to console input buffer." << std::endl;
 		}
 		FreeConsole();
-		while (!isTerminalReady()) {
+		while (!isTerminalReady() && IsProcessRunning(startedProcessIDs)) {
 			Sleep(100);
+		}
+		if (!IsProcessRunning(startedProcessIDs)) {
+			commandQueue = {};
 		}
 	}
 }
 
 bool Terminal::isTerminalReady() {
 	if (!AttachConsole(startedProcessIDs)) {
-		MessageBoxA(NULL, "Couldn't connect to the terminal.", "Error", MB_ICONERROR | MB_OK);
+		if (GetLastError() != ERROR_ACCESS_DENIED) {
+			MessageBoxA(NULL, "Failed to attach console.", "Error", MB_ICONERROR | MB_OK);
+			return false;
+		}
+	}
+	HANDLE hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+	if (hConsoleOutput == INVALID_HANDLE_VALUE) {
+		MessageBoxA(NULL, "Invalid console output handle.", "Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
-
-	HANDLE hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 	CHAR buffer[4096];
-	DWORD charsRead;
+	DWORD charsRead = 0;
 
 	COORD coord = { 0, 0 };
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	if (!GetConsoleScreenBufferInfo(hConsoleOutput, &csbi)) {
-		FreeConsole();
+		MessageBoxA(NULL, "GetConsoleScreenBufferInfo.", "Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
-	DWORD consoleSize = csbi.dwSize.X * csbi.dwSize.Y;
+	DWORD consoleSize = std::min<DWORD>(csbi.dwSize.X * csbi.dwSize.Y, 4096);
 
 	if (!ReadConsoleOutputCharacterA(hConsoleOutput, buffer, consoleSize, coord, &charsRead)) {
-		FreeConsole();
+		MessageBoxA(NULL, "ReadConsoleOutputCharacterW.", "Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
-
-	FreeConsole();
 
 	std::string output(buffer, charsRead);
 	return output.find(">") != std::string::npos;
