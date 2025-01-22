@@ -11,7 +11,6 @@
 #include "getText.h"
 #include <shlobj.h>
 #include <cstdio>
-#include <signal.h>
 
 HANDLE hMutex;
 
