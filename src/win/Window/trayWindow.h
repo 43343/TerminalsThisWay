@@ -1,7 +1,5 @@
 #pragma once
 #include <windows.h>
-#include <shellapi.h>
-#include <cstdio>
 #include "settings.h"
 #include "../terminal.h"
 #define WM_TRAYICON (WM_USER + 1)

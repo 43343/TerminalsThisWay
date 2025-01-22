@@ -1,6 +1,5 @@
 #include "trayWindow.h"
 #include <cstring>
-#include <shellapi.h>
 #include "../Config/configManager.h"
 #include "../Utility/utility.h"
 #include "about.h"

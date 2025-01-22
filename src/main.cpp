@@ -1,5 +1,4 @@
 #include "application.h"
-#include "version.h"
 #include <iostream>
 
 

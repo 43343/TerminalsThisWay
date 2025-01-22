@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
-#include <windows.h>    
-#include <vector>
+#include <windows.h>
 #include <queue>
 #include <thread>
 #include <condition_variable>

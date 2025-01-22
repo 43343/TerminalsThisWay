@@ -1,6 +1,6 @@
 ﻿#include "getText.h"
 #include <iostream>
-#include "Config//configManager.h"
+#include "Config/configManager.h"
 
 GetText* g_GetTextInstance = nullptr;
 auto firstPressTime = std::chrono::steady_clock::now();

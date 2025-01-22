@@ -1,6 +1,5 @@
 ﻿#include "inputKeyBind.h"
 #include <iostream>
-#include <tchar.h>
 #include "../../Utility/utility.h"
 
 namespace GUI {

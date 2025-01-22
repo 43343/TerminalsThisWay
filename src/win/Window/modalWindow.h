@@ -2,7 +2,6 @@
 #include <string>
 #include "GUI/button.h"
 #include "GUI/text.h"
-#include <functional>
 
 class ModalWindow
 {

@@ -1,6 +1,5 @@
 #pragma once
 #include <windows.h>
-#include <string>
 
 namespace GUI {
     class Toggle {

@@ -1,4 +1,5 @@
 #include"utility.h"
+#include <unordered_map>
 
 DWORD stringTokey(const std::wstring& key) {
 	// Используем static для инициализации карты только один раз

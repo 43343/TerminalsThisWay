@@ -1,9 +1,7 @@
 ﻿#include "configManager.h"
 #include <string>
 #include <algorithm>
-#include <cctype>
-#include <locale>
-#include <codecvt>
+#include <unordered_map>
 
 #include "../Utility/utility.h"
 
@@ -106,7 +104,6 @@ bool ConfigManager::loadFromFile(const std::wstring& filePath)
 	std::wcout << getAbsolutePath(filePath);
 	std::wifstream infile(getAbsolutePath(filePath));
 	if (!infile.is_open()) {
-		std::wcerr << "Íå óäàëîñü îòêðûòü ôàéë: " << filePath << std::endl;
 		return false;
 	}
 

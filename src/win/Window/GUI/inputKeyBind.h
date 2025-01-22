@@ -1,7 +1,6 @@
 #pragma once
 #include <windows.h>
 #include <string>
-#include <sstream>
 
 namespace GUI {
 	class InputKeyBind {

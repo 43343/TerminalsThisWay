@@ -2,7 +2,6 @@
 #include <iostream>
 #include <shlobj.h>
 #include "../Config/configManager.h"
-#include <locale>
 ChooseFolder* g_ChooseFolderInstance = nullptr;
 auto firstPressTimeChooseFolder = std::chrono::steady_clock::now();
 
@@ -43,7 +42,7 @@ std::wstring ChooseFolder::SelectFolder()
 	);
 
 	BROWSEINFOW bi = { 0 };
-	std::wstring title = L"똥 폴더";
+	std::wstring title = L"Select folder";
 	std::wcout << "Выбранный путь: " << title << std::endl;
 	printf("Выбранный путь:");
 	bi.lpszTitle = title.c_str();

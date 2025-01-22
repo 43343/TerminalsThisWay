@@ -1,8 +1,6 @@
 #pragma once
 #include <iostream>
-#include <fstream>
 #include <string>
-#include <unordered_map>
 
 class Config {
 public:
