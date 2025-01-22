@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cstdlib>
 #include "ParameterInputWindow.h"
+#include "../Terminal.h"
 #include <thread>
 #include <chrono>
 
@@ -16,6 +17,7 @@ void run_xlib()
     }
     ParameterInputWindow inputWindow;
     Window root = DefaultRootWindow(display);
+    Terminal* terminal = new Terminal();
 
     XGrabKey(display, XKeysymToKeycode(display, XK_Insert), Mod4Mask, root, True, GrabModeAsync, GrabModeAsync);
     XGrabKey(display, XKeysymToKeycode(display, XK_Insert), 0, root, True, GrabModeAsync, GrabModeAsync);
@@ -34,13 +36,7 @@ void run_xlib()
                 KeySym keysym = XLookupKeysym(&event.xkey, 0);
                 if ((event.xkey.state & Mod4Mask) && keysym == XK_Insert)
                 {
-                    int x, y;
-                    Window returnedRoot, returnedChild;
-                    int rootX, rootY;
-                    unsigned int mask;
-                    XQueryPointer(display, root, &returnedRoot, &returnedChild, &rootX, &rootY, &x, &y, &mask);
-                    inputWindow.create(x, y);
-                    XGrabKey(display, XKeysymToKeycode(display, XK_Return), 0, root, True, GrabModeAsync, GrabModeAsync);
+                    terminal->sendCommandToCmd("cd", true);
                 }
                 else if (keysym == XK_Insert)
                 {

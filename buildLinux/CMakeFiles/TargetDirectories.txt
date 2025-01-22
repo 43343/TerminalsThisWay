@@ -1,0 +1,9 @@
+/home/DimonX/TerminalsThisWay/buildLinux/CMakeFiles/TerminalsThisWay.dir
+/home/DimonX/TerminalsThisWay/buildLinux/CMakeFiles/package.dir
+/home/DimonX/TerminalsThisWay/buildLinux/CMakeFiles/package_source.dir
+/home/DimonX/TerminalsThisWay/buildLinux/CMakeFiles/edit_cache.dir
+/home/DimonX/TerminalsThisWay/buildLinux/CMakeFiles/rebuild_cache.dir
+/home/DimonX/TerminalsThisWay/buildLinux/CMakeFiles/list_install_components.dir
+/home/DimonX/TerminalsThisWay/buildLinux/CMakeFiles/install.dir
+/home/DimonX/TerminalsThisWay/buildLinux/CMakeFiles/install/local.dir
+/home/DimonX/TerminalsThisWay/buildLinux/CMakeFiles/install/strip.dir
