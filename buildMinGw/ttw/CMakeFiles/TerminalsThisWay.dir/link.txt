@@ -1,0 +1,3 @@
+/usr/bin/cmake -E rm -f CMakeFiles/TerminalsThisWay.dir/objects.a
+/usr/bin/x86_64-w64-mingw32-ar qc CMakeFiles/TerminalsThisWay.dir/objects.a @CMakeFiles/TerminalsThisWay.dir/objects1.rsp
+/usr/bin/x86_64-w64-mingw32-g++ -Wl,--whole-archive CMakeFiles/TerminalsThisWay.dir/objects.a -Wl,--no-whole-archive -o ../bin/TerminalsThisWay.exe -Wl,--out-implib,libTerminalsThisWay.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles/TerminalsThisWay.dir/linkLibs.rsp

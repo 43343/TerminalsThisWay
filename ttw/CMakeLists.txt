@@ -22,8 +22,8 @@ set(SourcesWin
     win/Window/GUI/inputField.h
     win/Window/GUI/toggle.cpp
     win/Window/GUI/toggle.h
-    win/Window/GUI/InputKeyBind.cpp
-    win/Window/GUI/InputKeyBind.h
+    win/Window/GUI/inputKeyBind.cpp
+    win/Window/GUI/inputKeyBind.h
     win/Window/GUI/text.cpp
     win/Window/GUI/text.h
     win/Window/GUI/button.cpp
