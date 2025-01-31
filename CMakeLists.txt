@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(TerminalsThisWay VERSION 0.2.0 LANGUAGES CXX)
+if(MINGW)
+    set(CMAKE_C_COMPILER gcc)
+    set(CMAKE_CXX_COMPILER g++)
+    set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
+endif()
+
+project(TerminalsThisWay VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -14,54 +21,14 @@ endif()
 if(MSVC)
     set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
 endif()
+if(MINGW)
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS} -mwindows")
+endif()
 
 configure_file(
-     "src/version.h.in"
-     "../src/version.h"
+     "ttw/version.h.in"
+     "../ttw/version.h"
    )
-
-   set(SourcesWin
-    src/main.cpp
-    src/application.h
-    src/win/application.cpp
-    src/win/Window/trayWindow.cpp
-    src/win/Window/trayWindow.h
-    src/win/Window/settings.cpp
-    src/win/Window/settings.h
-    src/win/Window/GUI/inputField.cpp
-    src/win/Window/GUI/inputField.h
-    src/win/Window/GUI/toggle.cpp
-    src/win/Window/GUI/toggle.h
-    src/win/Window/GUI/InputKeyBind.cpp
-    src/win/Window/GUI/InputKeyBind.h
-    src/win/Window/GUI/text.cpp
-    src/win/Window/GUI/text.h
-    src/win/Window/GUI/button.cpp
-    src/win/Window/GUI/button.h
-    src/win/Window/GUI/image.cpp
-    src/win/Window/GUI/image.h
-    src/win/Window/parameterInputWindow.cpp
-    src/win/Window/parameterInputWindow.h
-    src/win/Window/about.cpp
-    src/win/Window/about.h
-    src/win/Window/modalWindow.cpp
-    src/win/Window/modalWindow.h
-    src/win/updater.cpp
-    src/win/updater.h
-    src/win/Config/config.h
-    src/win/Config/configManager.cpp
-    src/win/Config/configManager.h
-    src/win/Utility/utility.cpp
-    src/win/Utility/utility.h
-    src/win/Utility/json.hpp
-    src/win/getText.cpp
-    src/win/getText.h
-    src/win/Window/chooseFolder.cpp
-    src/win/Window/chooseFolder.h
-    src/win/terminal.cpp
-    src/win/terminal.h
-    src/version.h
-)
 set(SourcesLinux
 src/main.cpp
 src/application.h
@@ -88,13 +55,10 @@ if(LINUX)
   target_link_directories(TerminalsThisWay PRIVATE ${GTK_LIBRARY_DIRS})
 endif()
 
-if(WIN32)
-    list(APPEND SourcesWin ${APP_ICON_RESOURCE_WINDOWS})
-    add_executable(TerminalsThisWay ${SourcesWin})
-    target_link_libraries(TerminalsThisWay PRIVATE wininet)
-endif()
+add_subdirectory(command)
+add_subdirectory(ttw)
 
-install(TARGETS TerminalsThisWay DESTINATION .)
+install(TARGETS TerminalsThisWay Command DESTINATION .)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/Modules" ${CMAKE_MODULE_PATH})
 

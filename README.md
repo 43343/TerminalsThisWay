@@ -27,17 +27,16 @@ soon...
 ## Windows
 ### System requirements
 
-+ [Microsoft Visual Studio](https://visualstudio.microsoft.com/ru/downloads/)
++ [Microsoft Visual Studio](https://visualstudio.microsoft.com/ru/downloads/) or [MSYS2/MinGW](https://www.msys2.org/)
 + [CMake](https://cmake.org/)
 
 ```bash
 git clone https://github.com/43343/TerminalsThisWay.git
 cd TerminalsThisWay
-cmake -B build
+mkdir build
+cmake -B build -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release or cmake -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
-
-Compile with MinGW soon...
 
 ## Linux
 soon...
