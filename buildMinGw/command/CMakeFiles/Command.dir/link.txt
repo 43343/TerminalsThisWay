@@ -1,3 +1,0 @@
-/usr/bin/cmake -E rm -f CMakeFiles/Command.dir/objects.a
-/usr/bin/x86_64-w64-mingw32-ar qc CMakeFiles/Command.dir/objects.a @CMakeFiles/Command.dir/objects1.rsp
-/usr/bin/x86_64-w64-mingw32-g++ -Wl,--whole-archive CMakeFiles/Command.dir/objects.a -Wl,--no-whole-archive -o ../bin/Command.exe -Wl,--out-implib,libCommand.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles/Command.dir/linkLibs.rsp
