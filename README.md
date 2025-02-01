@@ -38,7 +38,7 @@ cmake -B build -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release or cmake -B
 cmake --build build
 ```
 
-For the convenience of compiling c using MinGW via Linux, you can use a toolchain file for convenience. Example:
+For the convenience of compilation using MinGW via Linux, you can use a toolchain file for convenience. For example:
 ```bash
 -DCMAKE_TOOLCHAIN_FILE=mingw-linux-toolchain.cmake DMINGW_TARGET_ARCH=x86 or x64
 ```
