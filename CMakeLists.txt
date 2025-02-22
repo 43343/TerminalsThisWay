@@ -13,6 +13,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/Modules" ${CMAKE_MODULE_PATH})
+
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 if(WIN32)
     set(APP_ICON_RESOURCE_WINDOWS "res/app_icon.rc")
@@ -30,18 +32,20 @@ configure_file(
      "../ttw/version.h"
    )
 set(SourcesLinux
-src/main.cpp
-src/application.h
-src/version.h
-src/linux/application.cpp
-src/linux/Terminal.h
-src/linux/Terminal.cpp
-src/linux/x11/main_xlib.h
-src/linux/x11/main_xlib.cpp
-src/linux/x11/xlib_helper.cpp
-src/linux/x11/xlib_helper.h
-src/linux/x11/ParameterInputWindow.h
-src/linux/x11/ParameterInputWindow.cpp
+ttw/main.cpp
+ttw/application.h
+ttw/version.h
+ttw/linux/application.cpp
+ttw/linux/Terminal.h
+ttw/linux/Terminal.cpp
+ttw/linux/log.h
+ttw/linux/log.cpp
+ttw/linux/x11/main_xlib.h
+ttw/linux/x11/main_xlib.cpp
+ttw/linux/x11/xlib_helper.cpp
+ttw/linux/x11/xlib_helper.h
+ttw/linux/x11/ParameterInputWindow.h
+ttw/linux/x11/ParameterInputWindow.cpp
 )
 
 if(LINUX)
@@ -49,17 +53,16 @@ if(LINUX)
   find_package(PkgConfig REQUIRED)
   pkg_check_modules(GTK REQUIRED gtk+-3.0)
   add_executable(TerminalsThisWay ${SourcesLinux})
-  target_link_libraries(TerminalsThisWay PRIVATE ${X11_LIBRARIES} ${GTK_LIBRARIES})
+  target_link_libraries(TerminalsThisWay PRIVATE ${X11_LIBRARIES} ${GTK_LIBRARIES} Xtst)
   target_compile_options(TerminalsThisWay PRIVATE ${GTK_CFLAGS_OTHER})
   target_include_directories(TerminalsThisWay PRIVATE ${X11_INCLUDE_DIR} ${GTK_INCLUDE_DIRS})
   target_link_directories(TerminalsThisWay PRIVATE ${GTK_LIBRARY_DIRS})
 endif()
 
-add_subdirectory(command)
-add_subdirectory(ttw)
+#add_subdirectory(command)
+#add_subdirectory(ttw)
 
-install(TARGETS TerminalsThisWay Command DESTINATION .)
-
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/Modules" ${CMAKE_MODULE_PATH})
+#install(TARGETS TerminalsThisWay Command DESTINATION .)
+install(TARGETS TerminalsThisWay DESTINATION .)
 
 include(cmake/Templates/CPackConfig.cmake)
