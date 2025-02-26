@@ -35,6 +35,6 @@ configure_file(
 add_subdirectory(command)
 add_subdirectory(ttw)
 
-#install(TARGETS TerminalsThisWay Command DESTINATION .)
+install(TARGETS TerminalsThisWay Command DESTINATION .)
 
 include(cmake/Templates/CPackConfig.cmake)
