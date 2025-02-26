@@ -16,8 +16,8 @@ The purposes for which you may need TerminalsThisWay:
 
 You can download the Windows version below:
 
-+ [64-bit](https://github.com/43343/TerminalsThisWay/releases/download/0.0.2/TerminalsThisWay-0.0.2-win64.exe)
-+ ~32-bit~ soon...
++ [64-bit](https://github.com/43343/TerminalsThisWay/releases/download/0.0.2/TerminalsThisWay-1.0.0-win64.exe)
++ [32-bit](https://github.com/43343/TerminalsThisWay/releases/download/0.0.2/TerminalsThisWay-1.0.0-win32.exe)
 
 ## Linux
 soon...
@@ -42,6 +42,3 @@ For the convenience of compilation using MinGW via Linux, you can use a toolchai
 ```bash
 -DCMAKE_TOOLCHAIN_FILE=mingw-linux-toolchain.cmake DMINGW_TARGET_ARCH=x86 or x64
 ```
-
-## Linux
-soon...

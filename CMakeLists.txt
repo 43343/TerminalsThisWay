@@ -31,38 +31,10 @@ configure_file(
      "ttw/version.h.in"
      "../ttw/version.h"
    )
-set(SourcesLinux
-ttw/main.cpp
-ttw/application.h
-ttw/version.h
-ttw/linux/application.cpp
-ttw/linux/Terminal.h
-ttw/linux/Terminal.cpp
-ttw/linux/log.h
-ttw/linux/log.cpp
-ttw/linux/x11/main_xlib.h
-ttw/linux/x11/main_xlib.cpp
-ttw/linux/x11/xlib_helper.cpp
-ttw/linux/x11/xlib_helper.h
-ttw/linux/x11/ParameterInputWindow.h
-ttw/linux/x11/ParameterInputWindow.cpp
-)
 
-if(LINUX)
-  find_package(X11 REQUIRED)
-  find_package(PkgConfig REQUIRED)
-  pkg_check_modules(GTK REQUIRED gtk+-3.0)
-  add_executable(TerminalsThisWay ${SourcesLinux})
-  target_link_libraries(TerminalsThisWay PRIVATE ${X11_LIBRARIES} ${GTK_LIBRARIES} Xtst)
-  target_compile_options(TerminalsThisWay PRIVATE ${GTK_CFLAGS_OTHER})
-  target_include_directories(TerminalsThisWay PRIVATE ${X11_INCLUDE_DIR} ${GTK_INCLUDE_DIRS})
-  target_link_directories(TerminalsThisWay PRIVATE ${GTK_LIBRARY_DIRS})
-endif()
-
-#add_subdirectory(command)
-#add_subdirectory(ttw)
+add_subdirectory(command)
+add_subdirectory(ttw)
 
 #install(TARGETS TerminalsThisWay Command DESTINATION .)
-install(TARGETS TerminalsThisWay DESTINATION .)
 
 include(cmake/Templates/CPackConfig.cmake)
