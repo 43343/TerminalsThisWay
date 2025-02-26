@@ -19,9 +19,6 @@ You can download the Windows version below:
 + [64-bit](https://github.com/43343/TerminalsThisWay/releases/download/0.0.2/TerminalsThisWay-1.0.0-win64.exe)
 + [32-bit](https://github.com/43343/TerminalsThisWay/releases/download/0.0.2/TerminalsThisWay-1.0.0-win32.exe)
 
-## Linux
-soon...
-
 
 # Build
 ## Windows
