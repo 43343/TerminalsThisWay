@@ -81,10 +81,10 @@ Application::Application(int argc, char* argv[]) {
 	std::wcout << "SendCommand: " << config.sendCommand << std::endl;
 	std::wcout << "SendCommandParameter: " << config.sendCommandParameter << std::endl;
 	std::wcout << "ChooseFolder: " << config.chooseFolder << std::endl;
-	TrayWindow* trayWindow = new TrayWindow(hInstance, cmdTerminal);
+	TrayWindow* trayWindow = new TrayWindow(hInstance, hMutex, cmdTerminal);
 	ChooseFolder* chooseFolder = new ChooseFolder(cmdTerminal);
 	GetHighlitedText* getText = new GetHighlitedText(cmdTerminal);
-	ParameterInputWindow* parameterInputWindow = new ParameterInputWindow(cmdTerminal, hInstance);
+	ParameterInputWindow* parameterInputWindow = new ParameterInputWindow(cmdTerminal);
 	SetProcessWorkingSetSize(GetCurrentProcess(), -1, -1);
 
 }

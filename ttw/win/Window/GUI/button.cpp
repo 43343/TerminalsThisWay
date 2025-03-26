@@ -1,5 +1,7 @@
 #include "button.h"
 #include <iostream>
+#include <shellapi.h>
+#include <commctrl.h>
 
 namespace GUI {
 	Button::Button(HINSTANCE hInstance, HWND parentHwnd, int x, int y, int width, int height)
@@ -31,6 +33,28 @@ namespace GUI {
 	}
 	void Button::setText(const std::string& text) {
 		SetWindowText(hwnd, text.c_str());
+	}
+	void Button::setSystemIcon(SHSTOCKICONID iconId) {
+		HICON hIcon;
+
+		SHSTOCKICONINFO sii = { sizeof(sii) };
+		if (SUCCEEDED(SHGetStockIconInfo(iconId, SHGSI_ICON | SHGSI_SMALLICON, &sii))) {
+			hIcon = sii.hIcon;
+
+			// Добавляем стиль BS_ICON
+			LONG_PTR style = GetWindowLongPtr(hwnd, GWL_STYLE);
+			SetWindowLongPtr(hwnd, GWL_STYLE, style | BS_ICON);
+			SendMessage(hwnd, BM_SETIMAGE, IMAGE_ICON, (LPARAM)hIcon);
+
+			// Центрируем иконку (альтернативный способ без BM_SETMARGINS)
+			RECT rc;
+			GetClientRect(hwnd, &rc);
+			rc.left += 5;
+			InflateRect(&rc, -5, 0);
+			SendMessage(hwnd, BCM_SETTEXTMARGIN, 0, (LPARAM)&rc);
+
+			InvalidateRect(hwnd, nullptr, TRUE);
+		}
 	}
 	void Button::setFontSize(int fontSize) {
 		if (hFont) {

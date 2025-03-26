@@ -3,11 +3,14 @@
 #include <chrono>
 #include <iostream>
 #include <windowsx.h> 
+#include <shellapi.h>
+#include <shlobj.h>
+#include <commdlg.h>
 
 ParameterInputWindow* g_ParameterInputWindowInstance = nullptr;
 auto firstPressTimeParameterInput = std::chrono::steady_clock::now();
 
-ParameterInputWindow::ParameterInputWindow(Terminal* cmd, HINSTANCE instance) : hTerminal(*cmd)
+ParameterInputWindow::ParameterInputWindow(Terminal* cmd) : hTerminal(*cmd)
 {
 	hHook = SetWindowsHookEx(WH_KEYBOARD_LL, LowLevelKeyboardProc, NULL, 0);
 	g_ParameterInputWindowInstance = this;
@@ -90,13 +93,112 @@ void ParameterInputWindow::CreateInputWindow()
 	const std::wstring& command = getSelectedText();
 	input->setInput(command);
 	btnAddPathFolder = new GUI::Button(GetModuleHandle(NULL), hwnd, 215, 0, 30, height);
+	btnAddPathFolder->setSystemIcon(SIID_FOLDER);
+	btnAddPathFolder->setCallback([&]() { SelectFolder(); });
 	btnAddPathFile = new GUI::Button(GetModuleHandle(NULL), hwnd, 260, 0, 30, height);
+	btnAddPathFile->setSystemIcon(SIID_DOCNOASSOC);
+	btnAddPathFile->setCallback([&]() { SelectFile(); });
 
 	ShowWindow(hwnd, SW_SHOW);
 	ShowWindow(hwndInputField, SW_SHOW);
 	UpdateWindow(hwndInputField);
 	SetFocus(input->getHwnd());
 
+}
+void ParameterInputWindow::SelectFolder()
+{
+	const wchar_t CLASS_NAME[] = L"BrowserInfoWindowClass";
+	DWORD startPos, endPos;
+	SendMessage(input->getHwnd(), EM_GETSEL, (WPARAM)&startPos, (LPARAM)&endPos);
+	CoInitialize(NULL);
+	BROWSEINFOW bi = { 0 };
+	std::wstring title = L"Select folder";
+	std::wcout << "Выбранный путь: " << title << std::endl;
+	printf("Выбранный путь:");
+	bi.lpszTitle = title.c_str();
+	bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
+	bi.hwndOwner = hwnd;
+	bi.lpfn = BrowseSelectFolderCallbackProc;
+
+	LPITEMIDLIST pidl = SHBrowseForFolderW(&bi);
+
+
+	std::wstring result;
+
+	if (pidl != 0)
+	{
+
+		wchar_t path[MAX_PATH];
+		if (SHGetPathFromIDListW(pidl, path))
+		{
+			result = std::wstring(path);
+
+			std::wstring currentText = input->getInput();
+			currentText.insert(startPos, result);
+			input->setInput(currentText);
+
+			DWORD newPos = startPos + result.length();
+			SendMessage(input->getHwnd(), EM_SETSEL, newPos, newPos);
+		}
+	}
+	CoTaskMemFree(pidl);
+	UnregisterClassW(CLASS_NAME, GetModuleHandle(NULL));
+	CoUninitialize();
+	CoFreeUnusedLibraries();
+	SetProcessWorkingSetSize(GetCurrentProcess(), -1, -1);
+	SetFocus(input->getHwnd());
+	std::wcout << "Выбранный путь: " << result << std::endl;
+}
+void ParameterInputWindow::SelectFile()
+{
+	const wchar_t CLASS_NAME[] = L"BrowserInfoWindowClass";
+	DWORD startPos, endPos;
+	SendMessage(input->getHwnd(), EM_GETSEL, (WPARAM)&startPos, (LPARAM)&endPos);
+	CoInitialize(NULL);
+
+	OPENFILENAMEW ofn = { 0 };
+	wchar_t szFile[MAX_PATH] = { 0 };
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = hwnd;
+	ofn.lpstrFile = szFile;
+	ofn.nMaxFile = MAX_PATH;
+	ofn.lpstrFilter = L"All Files\0*.*\0\0";
+	ofn.nFilterIndex = 1;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
+
+	std::wstring result;
+
+	if (GetOpenFileNameW(&ofn))
+	{
+		result = std::wstring(ofn.lpstrFile);
+
+		std::wstring currentText = input->getInput();
+		currentText.insert(startPos, result);
+		input->setInput(currentText);
+
+		DWORD newPos = startPos + result.length();
+		SendMessage(input->getHwnd(), EM_SETSEL, newPos, newPos);
+	}
+	UnregisterClassW(CLASS_NAME, GetModuleHandle(NULL));
+	CoUninitialize();
+	CoFreeUnusedLibraries();
+	SetProcessWorkingSetSize(GetCurrentProcess(), -1, -1);
+	SetFocus(input->getHwnd());
+	std::wcout << "Выбранный путь: " << result << std::endl;
+}
+
+int CALLBACK ParameterInputWindow::BrowseSelectFolderCallbackProc(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData)
+{
+	if (uMsg == BFFM_SELCHANGED) {
+		wchar_t path[MAX_PATH];
+		if (SHGetPathFromIDListW((LPITEMIDLIST)lParam, path)) {
+			SendMessage(hwnd, BFFM_ENABLEOK, 0, TRUE);
+		}
+		else {
+			SendMessage(hwnd, BFFM_ENABLEOK, 0, FALSE);
+		}
+	}
+	return 0;
 }
 LRESULT CALLBACK ParameterInputWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	static POINT dragStartPoint;
@@ -202,7 +304,7 @@ LRESULT CALLBACK ParameterInputWindow::LowLevelKeyboardProc(int nCode, WPARAM wP
 		}
 		if (g_ParameterInputWindowInstance->isDialogOpen)
 		{
-			if ((wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) && pKeyboard->vkCode == VK_RETURN)
+			if ((wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) && pKeyboard->vkCode == VK_RETURN && IsWindowEnabled(g_ParameterInputWindowInstance->hwnd))
 			{
 				std::wstring command = g_ParameterInputWindowInstance->input->getInput();
 				const wchar_t CLASS_NAME_INPUT_FIELD[] = L"ParameterInputFieldWindowClass";

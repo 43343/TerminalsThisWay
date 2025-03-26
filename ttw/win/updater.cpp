@@ -19,16 +19,16 @@ void Updater::checkUpdate()
 		std::string downloadUrl;
 		std::string localPath = "TerminalsThisWayNew.exe";
 		GetJsonData(downloadUrl, latestVersion);
-		modalWindow = new ModalWindow();
+		updateFoundWindow = new UpdateFoundWindow();
 		if (latestVersion.empty())
 		{
 			MessageBox(NULL, "Check your internet connection and try again", "Error", MB_ICONEXCLAMATION | MB_OK);
 		}
 		else
 		{
-			if (latestVersion > currentVersion)
+			if (latestVersion < currentVersion)
 			{
-				if (modalWindow->createWindow(currentVersion, latestVersion))
+				if (updateFoundWindow->createWindow(currentVersion, latestVersion))
 				{
 					if (DownloadFile(downloadUrl, localPath))
 					{
@@ -42,11 +42,12 @@ void Updater::checkUpdate()
 			}
 		}
 		isActive = false;
+		SetProcessWorkingSetSize(GetCurrentProcess(), -1, -1);
 	}
 }
 	Updater::~Updater()
 	{
-		delete modalWindow;
+		delete updateFoundWindow;
 	}
 	bool Updater::getActive()
 	{

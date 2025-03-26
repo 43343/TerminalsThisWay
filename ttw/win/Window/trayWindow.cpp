@@ -5,7 +5,7 @@
 #include "../Utility/utility.h"
 #include "about.h"
 
-TrayWindow::TrayWindow(HINSTANCE& hInstance, Terminal* cmd) : hWnd(nullptr), hTerminal(*cmd) {
+TrayWindow::TrayWindow(HINSTANCE& hInstance, HANDLE& mutex, Terminal* cmd) : hWnd(nullptr), hTerminal(*cmd), hMutex(mutex) {
 	const char CLASS_NAME[] = "TrayAppClass";
 	WNDCLASS wc = {};
 	wc.lpfnWndProc = WindowProc;
@@ -139,7 +139,9 @@ LRESULT CALLBACK TrayWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 		case ID_TRAY_RESTART_ADMIN:
 			if (runAsAdministrator())
 			{
+				CloseHandle(pThis->hMutex);
 				pThis->hTerminal.sendCommandToCMD(L"exit", false);
+				Sleep(1000);
 				exit(0);
 			}
 			break;

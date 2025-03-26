@@ -74,7 +74,6 @@ std::wstring ChooseFolder::SelectFolder()
 	isDialogOpen = false; 
 
 	return result;
-	return L"";
 }
 
 LRESULT CALLBACK ChooseFolder::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {

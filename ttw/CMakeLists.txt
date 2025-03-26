@@ -34,8 +34,8 @@ set(SourcesWin
     win/Window/parameterInputWindow.h
     win/Window/about.cpp
     win/Window/about.h
-    win/Window/modalWindow.cpp
-    win/Window/modalWindow.h
+    win/Window/updateFoundWindow.cpp
+    win/Window/updateFoundWindow.h
     win/updater.cpp
     win/updater.h
     win/Config/config.h

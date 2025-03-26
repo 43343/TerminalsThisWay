@@ -12,13 +12,14 @@
 
 class TrayWindow {
 public:
-    TrayWindow(HINSTANCE& hInstance, Terminal* cmd);
+    TrayWindow(HINSTANCE& hInstance, HANDLE& mutex, Terminal* cmd);
     ~TrayWindow();
 
 private:
     HWND hWnd;
     NOTIFYICONDATA nid;
     Terminal& hTerminal;
+    HANDLE& hMutex;
 
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 };

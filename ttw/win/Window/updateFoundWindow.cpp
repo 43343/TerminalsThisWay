@@ -1,18 +1,19 @@
-#include "modalWindow.h"
+#include "updateFoundWindow.h"
 #include <iostream>
+#include <shellapi.h>
 
-ModalWindow::ModalWindow()
+UpdateFoundWindow::UpdateFoundWindow()
 {
 
 }
 
-ModalWindow::~ModalWindow()
+UpdateFoundWindow::~UpdateFoundWindow()
 {
 
 }
 
 
-bool ModalWindow::createWindow(const std::string& currentVersion, const std::string& latestVersion)
+bool UpdateFoundWindow::createWindow(const std::string& currentVersion, const std::string& latestVersion)
 {
 	const char CLASS_NAME[] = "UpdateWindowClass";
 
@@ -21,7 +22,7 @@ bool ModalWindow::createWindow(const std::string& currentVersion, const std::str
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
 	WNDCLASS wc = {};
-	wc.lpfnWndProc = ModalWndProc;
+	wc.lpfnWndProc = UpdateFoundWndProc;
 	wc.hInstance = hInstance;
 	wc.lpszClassName = CLASS_NAME;
 	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
@@ -41,7 +42,9 @@ bool ModalWindow::createWindow(const std::string& currentVersion, const std::str
 		hInstance,
 		this
 	);
-	text = new GUI::Text(hInstance, hwnd, 45, 15, 300, 100);
+	image = new GUI::Image(hInstance, hwnd, 10, 15, 230, 20);
+	image->setIcon("IDI_UPDATE");
+	text = new GUI::Text(hInstance, hwnd, 55, 15, 300, 100);
 	text->setStyle(false, true);
 	text->setFontSize(10);
 	text->setText("A new version TerminalThisWay is available!\n\nCurrent Version: " + currentVersion + "\nLatest Version: " + latestVersion + "\n\nDo you want to update?");
@@ -69,7 +72,7 @@ bool ModalWindow::createWindow(const std::string& currentVersion, const std::str
 	return output;
 }
 
-LRESULT CALLBACK ModalWindow::ModalWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK UpdateFoundWindow::UpdateFoundWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	CREATESTRUCT* pCreate = (CREATESTRUCT*)lParam;
 
 	switch (uMsg)

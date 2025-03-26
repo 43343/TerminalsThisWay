@@ -42,7 +42,8 @@ bool About::createWindow()
 		return false;
 	}
 
-	image = new GUI::Image(hInstance, hwnd, 10, 15, 230, 20, "IDI_ICON1");
+	image = new GUI::Image(hInstance, hwnd, 10, 15, 230, 20);
+	image->setIcon("IDI_ICON1");
 	text1 = new GUI::Text(hInstance, hwnd, 45, 15, 200, 40);
 	text1->setStyle(false, true);
 	text1->setFontSize(10);

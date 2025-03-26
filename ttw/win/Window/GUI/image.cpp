@@ -2,23 +2,36 @@
 #include <iostream>
 
 namespace GUI {
-	Image::Image(HINSTANCE hInstance, HWND parentHwnd, int x, int y, int width, int height, std::string resourceId)
+	Image::Image(HINSTANCE hinstance, HWND parentHwnd, int x, int y, int width, int height) : hInstance(hinstance)
 	{
 		hwnd = CreateWindowEx(
-			0,                      // Optional window styles.
-			"Static",              // Predefined class; Unicode assumed.
-			nullptr,                // No text.
-			SS_ICON | WS_CHILD | WS_VISIBLE,  // Styles.
-			x, y, width, height,         // Position and size.
-			parentHwnd,                   // Parent window.
-			nullptr,                // No menu.
-			hInstance,              // Instance handle.
-			nullptr                 // Additional application data.
+			0,
+			"Static",
+			nullptr,
+			SS_ICON | WS_CHILD | WS_VISIBLE,  
+			x, y, width, height,
+			parentHwnd,
+			nullptr,
+			hinstance,
+			nullptr
 		);
-		HICON hIcon = LoadIcon(hInstance, "IDI_ICON1");
-		SendMessage(hwnd, STM_SETICON, (WPARAM)hIcon, 0);
-	}
+	} 
 	Image::~Image() {
+		if (hCurrentIcon) {
+			DestroyIcon(hCurrentIcon);
+		}
 	}
+	void Image::setIcon(LPCSTR resourceId)
+	{
+		if (hCurrentIcon) {
+			DestroyIcon(hCurrentIcon);
+			hCurrentIcon = nullptr;
+		}
 
+		HICON hIcon = LoadIcon(hInstance, resourceId);
+		if (hIcon) {
+			hCurrentIcon = hIcon;
+			SendMessage(hwnd, STM_SETICON, (WPARAM)hIcon, 0);
+		}
+	}
 }

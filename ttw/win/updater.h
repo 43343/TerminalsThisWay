@@ -4,7 +4,7 @@
 #include <winhttp.h>
 #include <fstream>
 #include <string>
-#include "Window/modalWindow.h"
+#include "Window/updateFoundWindow.h"
 
 #pragma comment(lib, "winhttp.lib")
 
@@ -24,5 +24,5 @@ private:
 	void RestartApplication();
 	std::string GetJsonFromUrl(const std::wstring& url);
 	bool isActive = false;
-	ModalWindow* modalWindow;
+	UpdateFoundWindow* updateFoundWindow;
 };
