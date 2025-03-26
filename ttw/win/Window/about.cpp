@@ -63,7 +63,7 @@ bool About::createWindow()
 
 void About::setText()
 {
-	text1->setText("TerminalsThisWay  " + currentVersion + " Alpha\n © 2024 43343");
+	text1->setText("TerminalsThisWay  " + currentVersion + "\n © 2025 43343");
 	btnOk->setText("OK");
 	btnCheckUpdate->setText("Check for updates");
 }
@@ -87,9 +87,11 @@ LRESULT CALLBACK About::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 		break;
 	case WM_DESTROY:
 		DestroyWindow(hWnd);
+		SetProcessWorkingSetSize(GetCurrentProcess(), -1, -1);
 		break;
 	case WM_CLOSE:
 		DestroyWindow(hWnd);
+		SetProcessWorkingSetSize(GetCurrentProcess(), -1, -1);
 		return 0;
 	case WM_CTLCOLORSTATIC:
 		HDC hdcStatic = (HDC)wParam;

@@ -68,10 +68,13 @@ std::wstring ChooseFolder::SelectFolder()
 	DestroyWindow(hwndParent);
 	UnregisterClassW(CLASS_NAME, GetModuleHandle(NULL));
 	CoUninitialize();
+	CoFreeUnusedLibraries();
+	SetProcessWorkingSetSize(GetCurrentProcess(), -1, -1);
 	std::wcout << "Выбранный путь: " << result << std::endl;
 	isDialogOpen = false; 
 
 	return result;
+	return L"";
 }
 
 LRESULT CALLBACK ChooseFolder::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {

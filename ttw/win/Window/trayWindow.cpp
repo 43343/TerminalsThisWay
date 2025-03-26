@@ -1,10 +1,9 @@
 #include "trayWindow.h"
 #include <cstring>
+#include <strsafe.h>
 #include "../Config/configManager.h"
 #include "../Utility/utility.h"
 #include "about.h"
-
-TrayWindow* g_TrayWindow = nullptr;
 
 TrayWindow::TrayWindow(HINSTANCE& hInstance, Terminal* cmd) : hWnd(nullptr), hTerminal(*cmd) {
 	const char CLASS_NAME[] = "TrayAppClass";
@@ -26,23 +25,26 @@ TrayWindow::TrayWindow(HINSTANCE& hInstance, Terminal* cmd) : hWnd(nullptr), hTe
 		this
 	);
 
+	SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+
 	ShowWindow(hWnd, SW_HIDE);
-
-	g_TrayWindow = this;
-
-	//AddTrayIcon();
 }
 
 TrayWindow::~TrayWindow() {
 	DestroyWindow(hWnd);
 }
+
 LRESULT CALLBACK TrayWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	static NOTIFYICONDATA nid;
+	TrayWindow* pThis = reinterpret_cast<TrayWindow*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+	CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
 	static Settings* settingsWindow = nullptr;
 	static About* aboutWindow = nullptr;
 
 	switch (uMsg) {
 	case WM_CREATE:
+		pThis = reinterpret_cast<TrayWindow*>(pCreate->lpCreateParams);
+		SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pThis));
 		nid.cbSize = sizeof(NOTIFYICONDATA);
 		nid.hWnd = hwnd;
 		nid.uVersion = NOTIFYICON_VERSION;
@@ -50,48 +52,73 @@ LRESULT CALLBACK TrayWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 		nid.uFlags = NIF_ICON | NIF_MESSAGE;
 		nid.uCallbackMessage = WM_TRAYICON;
 		nid.hIcon = LoadIcon((HINSTANCE)GetModuleHandle(NULL), "IDI_ICON1");
-		lstrcpy(nid.szTip, TEXT("TerminalsThisWay"));
+		StringCchCopy(nid.szTip, ARRAYSIZE(nid.szTip), TEXT("TerminalsThisWay"));
 		Shell_NotifyIcon(NIM_ADD, &nid);
 		break;
 
 	case WM_TRAYICON:
-		if (lParam == WM_RBUTTONDOWN) {
+		if (lParam == WM_RBUTTONDOWN || lParam == WM_LBUTTONDOWN) {
 			POINT pt;
 			GetCursorPos(&pt);
 
 			HMENU hMenu = CreatePopupMenu();
-			HICON hIcon = NULL;
-			SHSTOCKICONINFO sii = { sizeof(sii) };
-			if (SUCCEEDED(SHGetStockIconInfo(SIID_SHIELD, SHGSI_ICON | SHGSI_SMALLICON, &sii))) {
-				hIcon = sii.hIcon;
-			}
-
-			/*LPSTR s = const_cast<char*>(local->getText("restartAsAnAdministrator").c_str());
 			MENUITEMINFO mii = { sizeof(MENUITEMINFO) };
 			mii.fMask = MIIM_STRING | MIIM_ID | MIIM_BITMAP;
 			mii.wID = ID_TRAY_RESTART_ADMIN;
-			mii.dwTypeData = s;
-			HBITMAP hBitmap = nullptr;
-			ICONINFO iconInfo;
-			if (GetIconInfo(hIcon, &iconInfo))
-			{
-				hBitmap = iconInfo.hbmColor; // We use the color part of the icon
-				//DeleteObject(iconInfo.hbmMask); // We remove the mask if it is not needed
+			mii.dwTypeData = "Restart as an administrator";
+			SHSTOCKICONINFO sii = { sizeof(sii) };
+			if (SUCCEEDED(SHGetStockIconInfo(SIID_SHIELD, SHGSI_ICON | SHGSI_SMALLICON, &sii))) {
+				ICONINFO iconInfo = { 0 };
+				if (!GetIconInfo(sii.hIcon, &iconInfo)) {
+					return DefWindowProc(hwnd, uMsg, wParam, lParam);
+				}
+
+				BITMAP bmpColor = { 0 };
+				GetObject(iconInfo.hbmColor, sizeof(bmpColor), &bmpColor);
+
+				HDC hDC = GetDC(nullptr);
+				HDC hMemDC = CreateCompatibleDC(hDC);
+				HDC hMaskDC = CreateCompatibleDC(hDC);
+
+				BITMAPINFO bmi = { 0 };
+				bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+				bmi.bmiHeader.biWidth = bmpColor.bmWidth;
+				bmi.bmiHeader.biHeight = -bmpColor.bmHeight;
+				bmi.bmiHeader.biPlanes = 1;
+				bmi.bmiHeader.biBitCount = 32;
+				bmi.bmiHeader.biCompression = BI_RGB;
+
+				void* pBits = nullptr;
+				HBITMAP hAlphaBmp = CreateDIBSection(hDC, &bmi, DIB_RGB_COLORS, &pBits, nullptr, 0);
+				HBITMAP hOldBmp = (HBITMAP)SelectObject(hMemDC, hAlphaBmp);
+
+				DrawIconEx(hMemDC, 0, 0, sii.hIcon, bmpColor.bmWidth, bmpColor.bmHeight, 0, nullptr, DI_NORMAL);
+				if (isRunningAsAdministrator()) {
+					for (int y = 0; y < bmpColor.bmHeight; y++) {
+						RGBQUAD* pRow = (RGBQUAD*)((BYTE*)pBits + y * bmpColor.bmWidth * 4);
+						for (int x = 0; x < bmpColor.bmWidth; x++) {
+							if (pRow[x].rgbReserved > 0) { 
+								BYTE gray = (BYTE)(pRow[x].rgbRed * 0.299 +
+									pRow[x].rgbGreen * 0.587 +
+									pRow[x].rgbBlue * 0.114);
+								pRow[x].rgbRed = gray;
+								pRow[x].rgbGreen = gray;
+								pRow[x].rgbBlue = gray;
+							}
+						}
+					}
+				}
+
+				SelectObject(hMemDC, hOldBmp);
+				DeleteDC(hMemDC);
+				DeleteDC(hMaskDC);
+				ReleaseDC(nullptr, hDC);
+				DeleteObject(iconInfo.hbmColor);
+				DeleteObject(iconInfo.hbmMask);
+				mii.hbmpItem = hAlphaBmp;
+				DestroyIcon(sii.hIcon);
 			}
-			if (hBitmap)
-			{
-				mii.hbmpItem = hBitmap; // Installing HBITMAP in the menu item
-
-				// Add a menu item to the menu
-				InsertMenuItem(hMenu, 0, TRUE, &mii);
-
-				// Release the HBITMAP if it is no longer needed
-				//DeleteObject(hBitmap);
-			}
-
-			// Release the icon after use
-			//DestroyIcon(hIcon);*/
-			AppendMenu(hMenu, MF_STRING, ID_TRAY_RESTART_ADMIN, "Restart as an administrator");
+			InsertMenuItem(hMenu, 0, TRUE, &mii);
 			if (isRunningAsAdministrator())
 				EnableMenuItem(hMenu, ID_TRAY_RESTART_ADMIN, MF_BYCOMMAND | MF_GRAYED);
 			AppendMenu(hMenu, MF_STRING, ID_TRAY_UPDATE, "Update configuration");
@@ -101,7 +128,9 @@ LRESULT CALLBACK TrayWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 
 			SetForegroundWindow(hwnd);
 			TrackPopupMenu(hMenu, TPM_BOTTOMALIGN | TPM_LEFTALIGN, pt.x, pt.y, 0, hwnd, NULL);
+			ZeroMemory(&nid, sizeof(nid));
 			DestroyMenu(hMenu);
+			SetProcessWorkingSetSize(GetCurrentProcess(), -1, -1);
 		}
 		break;
 
@@ -110,7 +139,7 @@ LRESULT CALLBACK TrayWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 		case ID_TRAY_RESTART_ADMIN:
 			if (runAsAdministrator())
 			{
-				g_TrayWindow->hTerminal.sendCommandToCMD(L"exit", false);
+				pThis->hTerminal.sendCommandToCMD(L"exit", false);
 				exit(0);
 			}
 			break;
@@ -153,16 +182,18 @@ LRESULT CALLBACK TrayWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 			}
 			break;
 		case ID_TRAY_EXIT:
-			g_TrayWindow->hTerminal.sendCommandToCMD(L"exit", false);
+			pThis->hTerminal.sendCommandToCMD(L"exit", false);
 			Shell_NotifyIcon(NIM_DELETE, &nid);
+			Sleep(1000);
 			exit(0);
 			break;
 		}
 		break;
 
 	case WM_DESTROY:
-		g_TrayWindow->hTerminal.sendCommandToCMD(L"exit", false);
+		pThis->hTerminal.sendCommandToCMD(L"exit", false);
 		Shell_NotifyIcon(NIM_DELETE, &nid);
+		std::cout << "lol";
 		exit(0);
 		break;
 

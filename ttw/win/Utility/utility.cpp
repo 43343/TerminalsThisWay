@@ -247,47 +247,45 @@ std::wstring keyToString(DWORD keyCode)
 bool isRunningAsAdministrator()
 {
 	BOOL isAdmin = FALSE;
-	PSID administratorsGroup = NULL;
-
+	PSID administratorsGroup = nullptr;
 	SID_IDENTIFIER_AUTHORITY ntAuthority = SECURITY_NT_AUTHORITY;
+
 	if (AllocateAndInitializeSid(
 		&ntAuthority,
 		2,
 		SECURITY_BUILTIN_DOMAIN_RID,
 		DOMAIN_ALIAS_RID_ADMINS,
 		0, 0, 0, 0, 0, 0,
-		&administratorsGroup)) {
-		if (!CheckTokenMembership(NULL, administratorsGroup, &isAdmin)) {
+		&administratorsGroup))
+	{
+		if (!CheckTokenMembership(nullptr, administratorsGroup, &isAdmin)) {
 			isAdmin = FALSE;
 		}
 		FreeSid(administratorsGroup);
 	}
 
-	return isAdmin;
+	return isAdmin != FALSE;
 }
 bool runAsAdministrator()
 {
-	if (!isRunningAsAdministrator())
-	{
-		wchar_t path[MAX_PATH];
-		if (GetModuleFileNameW(NULL, path, MAX_PATH) == 0) {
-			return false;
-		}
-		HINSTANCE result = ShellExecuteW(
-			NULL,
-			L"runas",
-			path,
-			NULL,
-			NULL,
-			SW_SHOWNORMAL
-		);
-		if ((uintptr_t)result <= 32) {
-			return false;
-		}
-
-		return true;
+	if (isRunningAsAdministrator()) {
+		return false;
 	}
-	else return false;
+
+	wchar_t path[MAX_PATH];
+	if (GetModuleFileNameW(nullptr, path, MAX_PATH) == 0) {
+		return false;
+	}
+	SHELLEXECUTEINFOW sei = { sizeof(sei) };
+	sei.lpVerb = L"runas";
+	sei.lpFile = path;
+	sei.nShow = SW_SHOWNORMAL;
+
+	if (!ShellExecuteExW(&sei)) {
+		return false;
+	}
+
+	return true;
 }
 std::wstring getAppdataFolder()
 {

@@ -9,7 +9,7 @@ namespace GUI {
 			0,
 			"BUTTON",
 			"",
-			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON ,
 			x, y, width, height,
 			parentHwnd,
 			nullptr,

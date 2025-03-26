@@ -93,6 +93,7 @@ void Terminal::createProcessCommand()
 }
 void Terminal::sendCommandToCMD(const std::wstring& command, const bool& createCmd)
 {
+	std::cout << "govno";
 	if (createCmd)
 	{
 		createProcessCMD(ConfigManager::getInstance().getConfig().pathToTerminal);         

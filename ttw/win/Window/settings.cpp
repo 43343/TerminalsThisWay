@@ -39,10 +39,10 @@ bool Settings::createWindow() {
 	RegisterClass(&wc);
 
 	hwnd = CreateWindowEx(
-		0,
+		WS_EX_COMPOSITED,
 		CLASS_NAME,
 		"Settings",
-		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU,
+		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU ,
 		CW_USEDEFAULT, CW_USEDEFAULT, 580, 350,
 		nullptr,
 		nullptr,
@@ -150,6 +150,7 @@ LRESULT CALLBACK Settings::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 	case WM_CLOSE:
 		DestroyWindow(hwnd);
 		UnregisterClass("SettingsWindowClass", GetModuleHandle(NULL));
+		SetProcessWorkingSetSize(GetCurrentProcess(), -1, -1);
 		return 0;
 	case WM_SIZE:
 		if (wParam != SIZE_RESTORED) {
@@ -168,6 +169,7 @@ LRESULT CALLBACK Settings::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 	case WM_DESTROY:
 		DestroyWindow(hwnd);
 		UnregisterClass("SettingsWindowClass", GetModuleHandle(NULL));
+		SetProcessWorkingSetSize(GetCurrentProcess(), -1, -1);
 		break;
 	case WM_NCDESTROY:
 		if (pThis) {
@@ -176,9 +178,54 @@ LRESULT CALLBACK Settings::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 		}
 		break;
 	case WM_CTLCOLORSTATIC:
+	{
 		HDC hdcStatic = (HDC)wParam;
 		SetBkMode(hdcStatic, TRANSPARENT);
 		return (LRESULT)GetStockObject(NULL_BRUSH);
+	}
+	case WM_ERASEBKGND:
+		return 1;
+
+	case WM_PAINT:
+	{
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(hwnd, &ps);
+
+		HDC hdcMem = CreateCompatibleDC(hdc);
+		RECT rc;
+		GetClientRect(hwnd, &rc);
+		HBITMAP hbmMem = CreateCompatibleBitmap(hdc, rc.right, rc.bottom);
+		HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, hbmMem);
+
+		FillRect(hdcMem, &rc, (HBRUSH)(COLOR_WINDOW + 1));
+
+		EnumChildWindows(hwnd, [](HWND hChild, LPARAM lParam) -> BOOL {
+			HDC hdcMem = (HDC)lParam;
+
+			RECT rcChild;
+			GetWindowRect(hChild, &rcChild);
+
+			POINT pt = { rcChild.left, rcChild.top };
+			ScreenToClient(GetParent(hChild), &pt);
+
+			SetWindowOrgEx(hdcMem, -pt.x, -pt.y, NULL);
+
+			SendMessage(hChild, WM_PRINT, (WPARAM)hdcMem,
+				PRF_CLIENT | PRF_NONCLIENT | PRF_CHILDREN);
+
+			SetWindowOrgEx(hdcMem, 0, 0, NULL);
+
+			return TRUE;
+			}, (LPARAM)hdcMem);
+
+		BitBlt(hdc, 0, 0, rc.right, rc.bottom, hdcMem, 0, 0, SRCCOPY);
+
+		SelectObject(hdcMem, hbmOld);
+		DeleteObject(hbmMem);
+		DeleteDC(hdcMem);
+		EndPaint(hwnd, &ps);
+		return 0;
+	}
 	}
 
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);

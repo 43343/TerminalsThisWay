@@ -62,6 +62,7 @@ Application::Application(int argc, char* argv[]) {
 	{
 		cmdTerminal->sendCommandToCMD(L"exit", false);
 		PostQuitMessage(0);
+		return;
 	}
 
 	if (std::remove("TerminalsThisWayNew.exe") == 0)
@@ -84,6 +85,7 @@ Application::Application(int argc, char* argv[]) {
 	ChooseFolder* chooseFolder = new ChooseFolder(cmdTerminal);
 	GetHighlitedText* getText = new GetHighlitedText(cmdTerminal);
 	ParameterInputWindow* parameterInputWindow = new ParameterInputWindow(cmdTerminal, hInstance);
+	SetProcessWorkingSetSize(GetCurrentProcess(), -1, -1);
 
 }
 Application::~Application()

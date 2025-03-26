@@ -59,7 +59,5 @@ set(SourcesWin
 if(WIN32)
     list(APPEND SourcesWin ${APP_ICON_RESOURCE_WINDOWS})
     add_executable(TerminalsThisWay ${SourcesWin})
-    target_link_libraries(TerminalsThisWay PRIVATE winhttp)
-
-
+    target_link_libraries(TerminalsThisWay PRIVATE winhttp UxTheme)
 endif()

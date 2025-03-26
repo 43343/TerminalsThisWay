@@ -10,7 +10,7 @@ namespace GUI {
         std::wstring getInput() const;
         void setInput(const std::wstring& text);
         void setCallback(std::function<void()> cb);
-        void SetLimit(int limit);
+        void setLimit(int limit);
 
         HWND getHwnd() const;
     private:

@@ -27,6 +27,7 @@ Application::Application(char* argv[])
 	if (!isValidToken(argv[1]))
 	{
 		stopWorkingThread = true;
+		exit(0);
 		return;
 	}
 	SetConsoleOutputCP(65001);

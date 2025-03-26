@@ -18,21 +18,34 @@ namespace GUI {
 	void InputKeyBind::HandleParentClick(POINT pt) {
 		RECT rect;
 		GetWindowRect(hwnd, &rect);
-		ScreenToClient(GetParent(hwnd), (LPPOINT)&rect.left);
-		ScreenToClient(GetParent(hwnd), (LPPOINT)&rect.right);
 
-		if (!PtInRect(&rect, pt)) {
-			std::cout << keySequence.c_str();
+		POINT ptLeft = { rect.left, rect.top };
+		POINT ptRight = { rect.right, rect.bottom };
+
+		ScreenToClient(GetParent(hwnd), &ptLeft);
+		ScreenToClient(GetParent(hwnd), &ptRight);
+
+		RECT clientRect = { ptLeft.x, ptLeft.y, ptRight.x, ptRight.y };
+
+		if (!PtInRect(&clientRect, pt)) {
+			SendMessageW(hwnd, WM_SETREDRAW, FALSE, 0);
 			SetWindowTextW(hwnd, L"");
-			InvalidateRect(parentHwnd, NULL, TRUE);
-			UpdateWindow(parentHwnd);
 			SetWindowTextW(hwnd, keySequence.c_str());
+			SendMessageW(hwnd, WM_SETREDRAW, TRUE, 0);
+
+			InvalidateRect(GetParent(hwnd), &clientRect, FALSE);
+			UpdateWindow(GetParent(hwnd));
 		}
 	}
 
 	void InputKeyBind::setText(std::wstring text) {
 		keySequence = text;
+		SendMessageW(hwnd, WM_SETREDRAW, FALSE, 0);
 		SetWindowTextW(hwnd, keySequence.c_str());
+		SendMessageW(hwnd, WM_SETREDRAW, TRUE, 0);
+		RECT rc;
+		GetClientRect(hwnd, &rc);
+		InvalidateRect(hwnd, &rc, FALSE);
 	}
 	std::wstring InputKeyBind::getText() {
 		return keySequence;
@@ -136,7 +149,6 @@ namespace GUI {
 			SetWindowTextW(hwnd, L"");
 			InvalidateRect(keyBind->parentHwnd, NULL, TRUE);
 			UpdateWindow(keyBind->parentHwnd);
-			//keyBind->keySequence.clear();
 			std::cout << "LBUTTON";
 			SetWindowTextW(hwnd, L"Press the key");
 			btnCount = 0;
