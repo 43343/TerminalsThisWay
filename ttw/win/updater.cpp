@@ -26,7 +26,7 @@ void Updater::checkUpdate()
 		}
 		else
 		{
-			if (latestVersion < currentVersion)
+			if (latestVersion > currentVersion)
 			{
 				if (updateFoundWindow->createWindow(currentVersion, latestVersion))
 				{
