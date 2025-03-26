@@ -126,9 +126,25 @@ void Application::processNextCommand(std::wstring& command)
 			return;
 		}
 		HANDLE hConsoleInput = GetStdHandle(STD_INPUT_HANDLE);
+		INPUT_RECORD clearRecords[2];
+		clearRecords[0].EventType = KEY_EVENT;
+		clearRecords[0].Event.KeyEvent.bKeyDown = TRUE;
+		clearRecords[0].Event.KeyEvent.dwControlKeyState = 0;
+		clearRecords[0].Event.KeyEvent.uChar.UnicodeChar = VK_BACK;
+		clearRecords[0].Event.KeyEvent.wVirtualKeyCode = VK_BACK;
+		clearRecords[0].Event.KeyEvent.wVirtualScanCode = 0;
+		clearRecords[0].Event.KeyEvent.wRepeatCount = 100;
+		clearRecords[1].EventType = KEY_EVENT;
+		clearRecords[1].Event.KeyEvent.bKeyDown = TRUE;
+		clearRecords[1].Event.KeyEvent.dwControlKeyState = 0;
+		clearRecords[1].Event.KeyEvent.uChar.UnicodeChar = VK_DELETE;
+		clearRecords[1].Event.KeyEvent.wVirtualKeyCode = VK_DELETE;
+		clearRecords[1].Event.KeyEvent.wVirtualScanCode = 0;
+		clearRecords[1].Event.KeyEvent.wRepeatCount = 100;
+
+		DWORD eventsWritten;
 
 		INPUT_RECORD inputRecords[256];
-		DWORD eventsWritten;
 		size_t len = command.length();
 		for (size_t i = 0; i < len; ++i) {
 			inputRecords[i].EventType = KEY_EVENT;
@@ -154,6 +170,9 @@ void Application::processNextCommand(std::wstring& command)
 		}
 		while (!isTerminalReady() && IsProcessRunning(startedProcessIDsCMD)) {
 			Sleep(100);
+		}
+		if (!WriteConsoleInputW(hConsoleInput, clearRecords, 2, &eventsWritten)) {
+			std::cerr << "Failed to clear to console input buffer." << std::endl;
 		}
 		if (!WriteConsoleInputW(hConsoleInput, inputRecords, len + 2, &eventsWritten)) {
 			std::cerr << "Failed to write to console input buffer." << std::endl;
