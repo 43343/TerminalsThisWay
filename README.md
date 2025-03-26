@@ -16,8 +16,8 @@ The purposes for which you may need TerminalsThisWay:
 
 You can download the Windows version below:
 
-+ [64-bit](https://github.com/43343/TerminalsThisWay/releases/download/1.0.1/TerminalsThisWay-1.0.1-win64.exe)
-+ [32-bit](https://github.com/43343/TerminalsThisWay/releases/download/1.0.1/TerminalsThisWay-1.0.1-win32.exe)
++ [64-bit](https://github.com/43343/TerminalsThisWay/releases/download/1.0.0/TerminalsThisWay-1.0.0-win64.exe)
++ [32-bit](https://github.com/43343/TerminalsThisWay/releases/download/1.0.0/TerminalsThisWay-1.0.0-win32.exe)
 
 
 # Build

@@ -62,10 +62,13 @@ void Updater::checkUpdate()
 		BOOL  bResults = FALSE;
 		DWORD dwStatusCode = 0;
 		DWORD dwStatusSize = sizeof(dwStatusCode);
+		DWORD protocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
+		WinHttpSetOption(hSession, WINHTTP_OPTION_SECURE_PROTOCOLS, &protocols, sizeof(protocols));
+		DWORD securityFlags = SECURITY_FLAG_IGNORE_UNKNOWN_CA | SECURITY_FLAG_IGNORE_CERT_CN_INVALID;
+		WinHttpSetOption(hSession, WINHTTP_OPTION_SECURITY_FLAGS, &securityFlags, sizeof(securityFlags));
 
 		// Convert std::string to std::wstring
 		std::wstring wUrl(url.begin(), url.end());
-		std::wcout << wUrl;
 		std::wstring wFilePath(filePath.begin(), filePath.end());
 
 		// Initialize WinHTTP session
@@ -74,27 +77,21 @@ void Updater::checkUpdate()
 			WINHTTP_NO_PROXY_NAME,
 			WINHTTP_NO_PROXY_BYPASS, 0);
 		if (hSession) {
-			URL_COMPONENTS urlComp;
-			ZeroMemory(&urlComp, sizeof(urlComp));
+			URL_COMPONENTS urlComp = { 0 };
 			urlComp.dwStructSize = sizeof(urlComp);
+			urlComp.dwSchemeLength = (DWORD)-1;
+			urlComp.dwHostNameLength = (DWORD)-1;
+			urlComp.dwUrlPathLength = (DWORD)-1;
 
-			// Set required component lengths to non-zero so that they are cracked.
-			urlComp.dwSchemeLength = -1;
-			urlComp.dwHostNameLength = -1;
-			urlComp.dwUrlPathLength = -1;
-			urlComp.dwExtraInfoLength = -1;
-
-			wchar_t hostName[256];
-			wchar_t urlPath[256];
-			urlComp.lpszHostName = hostName;
-			urlComp.dwHostNameLength = ARRAYSIZE(hostName);
-			urlComp.lpszUrlPath = urlPath;
-			urlComp.dwUrlPathLength = ARRAYSIZE(urlPath);
+			wchar_t szHostName[256] = { 0 };
+			wchar_t szUrlPath[2048] = { 0 };
+			urlComp.lpszHostName = szHostName;
+			urlComp.dwHostNameLength = ARRAYSIZE(szHostName);
+			urlComp.lpszUrlPath = szUrlPath;
+			urlComp.dwUrlPathLength = ARRAYSIZE(szUrlPath);
 
 			// Crack the URL
 			if (WinHttpCrackUrl(wUrl.c_str(), 0, 0, &urlComp)) {
-				// Connect to the server
-				std::cout << " hostname " << urlComp.lpszHostName << "wUrl" << wUrl.c_str();
 				hConnect = WinHttpConnect(hSession, urlComp.lpszHostName,
 					urlComp.nPort, 0);
 				if (hConnect) {
@@ -121,7 +118,7 @@ void Updater::checkUpdate()
 									if (dwStatusCode == 200) { // HTTP_STATUS_OK
 										std::ofstream outFile(filePath, std::ios::binary);
 										if (!outFile) {
-											MessageBoxW(NULL, L"Failed to open file for writing: " + *filePath.c_str(), L"Error", MB_ICONEXCLAMATION | MB_OK);
+											MessageBoxA(NULL, "Failed to open file for writing: " + *filePath.c_str(), "Error", MB_ICONEXCLAMATION | MB_OK);
 											return false;
 										}
 
@@ -202,7 +199,7 @@ void Updater::checkUpdate()
 	{
 		std::wstring host = L"api.github.com";
 		std::wstring path = L"/repos/43343/TerminalsThisWay/releases/latest";
-		HINTERNET hSession = WinHttpOpen(L"A WinHTTP Example Program/1.0",
+		HINTERNET hSession = WinHttpOpen(L"TerminalsThisWay/1.0 (Windows NT)",
 			WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
 			WINHTTP_NO_PROXY_NAME,
 			WINHTTP_NO_PROXY_BYPASS, 0);
@@ -210,6 +207,10 @@ void Updater::checkUpdate()
 			MessageBoxA(NULL, "WinHttpOpen failed", "Error", MB_ICONEXCLAMATION | MB_OK);
 			return "";
 		}
+		DWORD protocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
+		WinHttpSetOption(hSession, WINHTTP_OPTION_SECURE_PROTOCOLS, &protocols, sizeof(protocols));
+		DWORD securityFlags = SECURITY_FLAG_IGNORE_UNKNOWN_CA | SECURITY_FLAG_IGNORE_CERT_CN_INVALID;
+		WinHttpSetOption(hSession, WINHTTP_OPTION_SECURITY_FLAGS, &securityFlags, sizeof(securityFlags));
 		HINTERNET hConnect = WinHttpConnect(hSession, host.c_str(), INTERNET_DEFAULT_HTTPS_PORT, 0);
 		if (!hConnect) {
 			MessageBoxA(NULL, "WinHttpConnect failed", "Error", MB_ICONEXCLAMATION | MB_OK);
@@ -289,10 +290,12 @@ void Updater::checkUpdate()
 		try {
 			auto jsonResponse = json::parse(jsonString);
 
-			// Извлечение значений
+#if defined(_WIN64)
+			dowloadUrl = jsonResponse["assets"][1]["browser_download_url"];
+#elif defined(_WIN32)
 			dowloadUrl = jsonResponse["assets"][0]["browser_download_url"];
+#endif
 			lastVersion = jsonResponse["tag_name"];
-
 		}
 		catch (const json::exception& e) {
 			std::cerr << "JSON parsing error: " << e.what() << std::endl;
