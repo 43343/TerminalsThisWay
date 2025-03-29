@@ -4,7 +4,8 @@
 #include "../Config/configManager.h"
 
 Settings::Settings(HINSTANCE hInstance) :
-	hInstance(hInstance) {}
+	hInstance(hInstance) {
+}
 Settings::~Settings()
 {
 	delete settingsText;
@@ -25,7 +26,7 @@ Settings::~Settings()
 }
 
 bool Settings::createWindow() {
-	
+
 	const char CLASS_NAME[] = "SettingsWindowClass";
 
 	WNDCLASS wc = {};
@@ -42,7 +43,7 @@ bool Settings::createWindow() {
 		WS_EX_COMPOSITED,
 		CLASS_NAME,
 		"Settings",
-		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU ,
+		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU,
 		CW_USEDEFAULT, CW_USEDEFAULT, 580, 350,
 		nullptr,
 		nullptr,
@@ -199,7 +200,7 @@ LRESULT CALLBACK Settings::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 
 		FillRect(hdcMem, &rc, (HBRUSH)(COLOR_WINDOW + 1));
 
-		EnumChildWindows(hwnd, [](HWND hChild, LPARAM lParam) -> BOOL {
+		EnumChildWindows(hwnd, [](HWND hChild, LPARAM lParam)->BOOL __stdcall {
 			HDC hdcMem = (HDC)lParam;
 
 			RECT rcChild;
@@ -209,14 +210,12 @@ LRESULT CALLBACK Settings::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 			ScreenToClient(GetParent(hChild), &pt);
 
 			SetWindowOrgEx(hdcMem, -pt.x, -pt.y, NULL);
-
 			SendMessage(hChild, WM_PRINT, (WPARAM)hdcMem,
 				PRF_CLIENT | PRF_NONCLIENT | PRF_CHILDREN);
-
 			SetWindowOrgEx(hdcMem, 0, 0, NULL);
 
 			return TRUE;
-			}, (LPARAM)hdcMem);
+		}, (LPARAM)hdcMem);
 
 		BitBlt(hdc, 0, 0, rc.right, rc.bottom, hdcMem, 0, 0, SRCCOPY);
 

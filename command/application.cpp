@@ -126,44 +126,60 @@ void Application::processNextCommand(std::wstring& command)
 			return;
 		}
 		HANDLE hConsoleInput = GetStdHandle(STD_INPUT_HANDLE);
-		INPUT_RECORD clearRecords[2];
-		clearRecords[0].EventType = KEY_EVENT;
-		clearRecords[0].Event.KeyEvent.bKeyDown = TRUE;
-		clearRecords[0].Event.KeyEvent.dwControlKeyState = 0;
-		clearRecords[0].Event.KeyEvent.uChar.UnicodeChar = VK_BACK;
-		clearRecords[0].Event.KeyEvent.wVirtualKeyCode = VK_BACK;
-		clearRecords[0].Event.KeyEvent.wVirtualScanCode = 0;
-		clearRecords[0].Event.KeyEvent.wRepeatCount = 100;
-		clearRecords[1].EventType = KEY_EVENT;
-		clearRecords[1].Event.KeyEvent.bKeyDown = TRUE;
-		clearRecords[1].Event.KeyEvent.dwControlKeyState = 0;
-		clearRecords[1].Event.KeyEvent.uChar.UnicodeChar = VK_DELETE;
-		clearRecords[1].Event.KeyEvent.wVirtualKeyCode = VK_DELETE;
-		clearRecords[1].Event.KeyEvent.wVirtualScanCode = 0;
-		clearRecords[1].Event.KeyEvent.wRepeatCount = 100;
 
 		DWORD eventsWritten;
 
-		INPUT_RECORD inputRecords[256];
+		INPUT_RECORD inputRecords[3280];
 		size_t len = command.length();
+		size_t currentPos = 0;
+
+		inputRecords[currentPos].EventType = KEY_EVENT;
+		inputRecords[currentPos].Event.KeyEvent.bKeyDown = TRUE;
+		inputRecords[currentPos].Event.KeyEvent.dwControlKeyState = LEFT_CTRL_PRESSED;
+		inputRecords[currentPos].Event.KeyEvent.uChar.UnicodeChar = 0;
+		inputRecords[currentPos].Event.KeyEvent.wRepeatCount = 1;
+		inputRecords[currentPos].Event.KeyEvent.wVirtualKeyCode = VK_HOME;
+		inputRecords[currentPos].Event.KeyEvent.wVirtualScanCode = MapVirtualKey(VK_HOME, MAPVK_VK_TO_VSC);
+		currentPos++;
+
+		inputRecords[currentPos] = inputRecords[currentPos - 1];
+		inputRecords[currentPos].Event.KeyEvent.bKeyDown = FALSE;
+		currentPos++;
+
+		inputRecords[currentPos].EventType = KEY_EVENT;
+		inputRecords[currentPos].Event.KeyEvent.bKeyDown = TRUE;
+		inputRecords[currentPos].Event.KeyEvent.dwControlKeyState = LEFT_CTRL_PRESSED;
+		inputRecords[currentPos].Event.KeyEvent.uChar.UnicodeChar = 0;
+		inputRecords[currentPos].Event.KeyEvent.wRepeatCount = 1;
+		inputRecords[currentPos].Event.KeyEvent.wVirtualKeyCode = VK_END;
+		inputRecords[currentPos].Event.KeyEvent.wVirtualScanCode = MapVirtualKey(VK_END, MAPVK_VK_TO_VSC);
+		currentPos++;
+
+		inputRecords[currentPos] = inputRecords[currentPos - 1];
+		inputRecords[currentPos].Event.KeyEvent.bKeyDown = FALSE;
+		currentPos++;
 		for (size_t i = 0; i < len; ++i) {
-			inputRecords[i].EventType = KEY_EVENT;
-			inputRecords[i].Event.KeyEvent.bKeyDown = TRUE;
-			inputRecords[i].Event.KeyEvent.dwControlKeyState = 0;
-			inputRecords[i].Event.KeyEvent.uChar.UnicodeChar = command[i];
-			inputRecords[i].Event.KeyEvent.wRepeatCount = 1;
-			inputRecords[i].Event.KeyEvent.wVirtualKeyCode = 0;
-			inputRecords[i].Event.KeyEvent.wVirtualScanCode = 0;
+			inputRecords[currentPos].EventType = KEY_EVENT;
+			inputRecords[currentPos].Event.KeyEvent.bKeyDown = TRUE;
+			inputRecords[currentPos].Event.KeyEvent.dwControlKeyState = 0;
+			inputRecords[currentPos].Event.KeyEvent.uChar.UnicodeChar = command[i];
+			inputRecords[currentPos].Event.KeyEvent.wRepeatCount = 1;
+			inputRecords[currentPos].Event.KeyEvent.wVirtualKeyCode = 0;
+			inputRecords[currentPos].Event.KeyEvent.wVirtualScanCode = 0;
+			currentPos++;
 		}
-		inputRecords[len].EventType = KEY_EVENT;
-		inputRecords[len].Event.KeyEvent.bKeyDown = TRUE;
-		inputRecords[len].Event.KeyEvent.dwControlKeyState = 0;
-		inputRecords[len].Event.KeyEvent.uChar.UnicodeChar = '\r';
-		inputRecords[len].Event.KeyEvent.wRepeatCount = 1;
-		inputRecords[len].Event.KeyEvent.wVirtualKeyCode = VK_RETURN;
-		inputRecords[len].Event.KeyEvent.wVirtualScanCode = 0;
-		inputRecords[len + 1] = inputRecords[len];
-		inputRecords[len + 1].Event.KeyEvent.bKeyDown = FALSE;
+		inputRecords[currentPos].EventType = KEY_EVENT;
+		inputRecords[currentPos].Event.KeyEvent.bKeyDown = TRUE;
+		inputRecords[currentPos].Event.KeyEvent.dwControlKeyState = 0;
+		inputRecords[currentPos].Event.KeyEvent.uChar.UnicodeChar = '\r';
+		inputRecords[currentPos].Event.KeyEvent.wRepeatCount = 1;
+		inputRecords[currentPos].Event.KeyEvent.wVirtualKeyCode = VK_RETURN;
+		inputRecords[currentPos].Event.KeyEvent.wVirtualScanCode = MapVirtualKey(VK_RETURN, MAPVK_VK_TO_VSC);
+		currentPos++;
+
+		inputRecords[currentPos] = inputRecords[currentPos - 1];
+		inputRecords[currentPos].Event.KeyEvent.bKeyDown = FALSE;
+		currentPos++;
 		if (!SetConsoleCtrlHandler(IgnoreCtrlHandler, TRUE)) {
 			MessageBoxA(NULL, "Failed to set control handler.", "Error", MB_ICONERROR | MB_OK);
 			return;
@@ -171,10 +187,8 @@ void Application::processNextCommand(std::wstring& command)
 		while (!isTerminalReady() && IsProcessRunning(startedProcessIDsCMD)) {
 			Sleep(100);
 		}
-		if (!WriteConsoleInputW(hConsoleInput, clearRecords, 2, &eventsWritten)) {
-			std::cerr << "Failed to clear to console input buffer." << std::endl;
-		}
-		if (!WriteConsoleInputW(hConsoleInput, inputRecords, len + 2, &eventsWritten)) {
+		if (!WriteConsoleInputW(hConsoleInput, inputRecords, currentPos, &eventsWritten)) {
+
 			std::cerr << "Failed to write to console input buffer." << std::endl;
 		}
 		if (!IsProcessRunning(startedProcessIDsCMD)) {

@@ -131,6 +131,7 @@ void Terminal::sendCommandToCMD(const std::wstring& command, const bool& createC
 	}
 	std::wstring data = std::to_wstring(startedProcessIDsCMD) + L"|" + command;
 	memcpy(pBuf, data.c_str(), (data.size() + 1) * sizeof(wchar_t));
+	SetProcessWorkingSetSize(GetCurrentProcess(), -1, -1);
 }
 std::string Terminal::generateToken()
 {

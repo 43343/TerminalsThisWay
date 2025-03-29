@@ -22,7 +22,7 @@ void Updater::checkUpdate()
 		updateFoundWindow = new UpdateFoundWindow();
 		if (latestVersion.empty())
 		{
-			MessageBox(NULL, "Check your internet connection and try again", "Error", MB_ICONEXCLAMATION | MB_OK);
+			MessageBox(NULL, "Check your internet connection and try again", "errorbl", MB_ICONEXCLAMATION | MB_OK);
 		}
 		else
 		{
@@ -62,10 +62,6 @@ void Updater::checkUpdate()
 		BOOL  bResults = FALSE;
 		DWORD dwStatusCode = 0;
 		DWORD dwStatusSize = sizeof(dwStatusCode);
-		DWORD protocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
-		WinHttpSetOption(hSession, WINHTTP_OPTION_SECURE_PROTOCOLS, &protocols, sizeof(protocols));
-		DWORD securityFlags = SECURITY_FLAG_IGNORE_UNKNOWN_CA | SECURITY_FLAG_IGNORE_CERT_CN_INVALID;
-		WinHttpSetOption(hSession, WINHTTP_OPTION_SECURITY_FLAGS, &securityFlags, sizeof(securityFlags));
 
 		// Convert std::string to std::wstring
 		std::wstring wUrl(url.begin(), url.end());
@@ -77,6 +73,11 @@ void Updater::checkUpdate()
 			WINHTTP_NO_PROXY_NAME,
 			WINHTTP_NO_PROXY_BYPASS, 0);
 		if (hSession) {
+			DWORD protocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
+			WinHttpSetOption(hSession, WINHTTP_OPTION_SECURE_PROTOCOLS, &protocols, sizeof(protocols));
+			DWORD securityFlags = SECURITY_FLAG_IGNORE_UNKNOWN_CA | SECURITY_FLAG_IGNORE_CERT_CN_INVALID;
+			WinHttpSetOption(hSession, WINHTTP_OPTION_SECURITY_FLAGS, &securityFlags, sizeof(securityFlags));
+
 			URL_COMPONENTS urlComp = { 0 };
 			urlComp.dwStructSize = sizeof(urlComp);
 			urlComp.dwSchemeLength = (DWORD)-1;
@@ -118,7 +119,7 @@ void Updater::checkUpdate()
 									if (dwStatusCode == 200) { // HTTP_STATUS_OK
 										std::ofstream outFile(filePath, std::ios::binary);
 										if (!outFile) {
-											MessageBoxA(NULL, "Failed to open file for writing: " + *filePath.c_str(), "Error", MB_ICONEXCLAMATION | MB_OK);
+											MessageBoxA(NULL, "Failed to open file for writing: " + *filePath.c_str(), "errorbl1", MB_ICONEXCLAMATION | MB_OK);
 											return false;
 										}
 
@@ -126,13 +127,13 @@ void Updater::checkUpdate()
 										do {
 											dwSize = 0;
 											if (!WinHttpQueryDataAvailable(hRequest, &dwSize)) {
-												MessageBoxA(NULL, "Error in WinHttpQueryDataAvailable ", "Error", MB_ICONEXCLAMATION | MB_OK);
+												MessageBoxA(NULL, "errorbl in WinHttpQueryDataAvailable ", "errorbl2", MB_ICONEXCLAMATION | MB_OK);
 												break;
 											}
 
 											pszOutBuffer = new char[dwSize + 1];
 											if (!pszOutBuffer) {
-												MessageBoxA(NULL, "Out of memory", "Error", MB_ICONEXCLAMATION | MB_OK);
+												MessageBoxA(NULL, "Out of memory", "errorbl3", MB_ICONEXCLAMATION | MB_OK);
 												break;
 											}
 
@@ -140,7 +141,7 @@ void Updater::checkUpdate()
 
 											if (!WinHttpReadData(hRequest, (LPVOID)pszOutBuffer,
 												dwSize, &dwDownloaded)) {
-												MessageBoxA(NULL, "Error in WinHttpReadData", "Error", MB_ICONEXCLAMATION | MB_OK);
+												MessageBoxA(NULL, "errorbl in WinHttpReadData", "errorbl4", MB_ICONEXCLAMATION | MB_OK);
 											}
 											else {
 												outFile.write(pszOutBuffer, dwDownloaded);
@@ -153,37 +154,37 @@ void Updater::checkUpdate()
 										outFile.close();
 									}
 									else {
-										MessageBoxA(NULL, "Failed to download file.HTTP Status Code : " + dwStatusCode, "Error", MB_ICONEXCLAMATION | MB_OK);
+										MessageBoxA(NULL, "Failed to download file.HTTP Status Code : " + dwStatusCode, "errorbl5", MB_ICONEXCLAMATION | MB_OK);
 									}
 								}
 							}
 						}
 						else
 						{
-							MessageBoxA(NULL, "Error in WinHttpSendRequest: " + GetLastError(), "Error", MB_ICONEXCLAMATION | MB_OK);
+							MessageBoxA(NULL, "errorbl in WinHttpSendRequest: " + GetLastError(), "errorbl6", MB_ICONEXCLAMATION | MB_OK);
 							return false;
 						}
 					}
 					else
 					{
-						MessageBoxA(NULL, "Error send HTTP Request: " + GetLastError(), "Error", MB_ICONEXCLAMATION | MB_OK);
+						MessageBoxA(NULL, "errorbl send HTTP Request: " + GetLastError(), "errorbl7", MB_ICONEXCLAMATION | MB_OK);
 						return false;
 					}
 				}
 				else
 				{
-					MessageBoxA(NULL, "Error creating HTTP Request: " + GetLastError(), "Error", MB_ICONEXCLAMATION | MB_OK);
+					MessageBoxA(NULL, "errorbl creating HTTP Request: " + GetLastError(), "errorbl8", MB_ICONEXCLAMATION | MB_OK);
 					return false;
 				}
 			}
 			else
 			{
-				MessageBoxA(NULL, "Error cracking URL: " + GetLastError(), "Error", MB_ICONEXCLAMATION | MB_OK);
+				MessageBoxA(NULL, "errorbl cracking URL: " + GetLastError(), "errorbl9", MB_ICONEXCLAMATION | MB_OK);
 				return false;
 			}
 		}
 		else {
-			MessageBoxA(NULL, "Error creating session: " + GetLastError(), "Error", MB_ICONEXCLAMATION | MB_OK);
+			MessageBoxA(NULL, "errorbl creating session: " + GetLastError(), "errorbl10", MB_ICONEXCLAMATION | MB_OK);
 			return false;
 		}
 
@@ -204,7 +205,7 @@ void Updater::checkUpdate()
 			WINHTTP_NO_PROXY_NAME,
 			WINHTTP_NO_PROXY_BYPASS, 0);
 		if (!hSession) {
-			MessageBoxA(NULL, "WinHttpOpen failed", "Error", MB_ICONEXCLAMATION | MB_OK);
+			MessageBoxA(NULL, "WinHttpOpen failed", "errorbl", MB_ICONEXCLAMATION | MB_OK);
 			return "";
 		}
 		DWORD protocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
@@ -213,7 +214,7 @@ void Updater::checkUpdate()
 		WinHttpSetOption(hSession, WINHTTP_OPTION_SECURITY_FLAGS, &securityFlags, sizeof(securityFlags));
 		HINTERNET hConnect = WinHttpConnect(hSession, host.c_str(), INTERNET_DEFAULT_HTTPS_PORT, 0);
 		if (!hConnect) {
-			MessageBoxA(NULL, "WinHttpConnect failed", "Error", MB_ICONEXCLAMATION | MB_OK);
+			MessageBoxA(NULL, "WinHttpConnect failed", "errorbl", MB_ICONEXCLAMATION | MB_OK);
 			WinHttpCloseHandle(hSession);
 			return "";
 		}
@@ -222,7 +223,7 @@ void Updater::checkUpdate()
 			WINHTTP_DEFAULT_ACCEPT_TYPES,
 			WINHTTP_FLAG_SECURE);
 		if (!hRequest) {
-			MessageBoxA(NULL, "WinHttpOpenRequest failed", "Error", MB_ICONEXCLAMATION | MB_OK);
+			MessageBoxA(NULL, "WinHttpOpenRequest failed", "errorbl", MB_ICONEXCLAMATION | MB_OK);
 			WinHttpCloseHandle(hConnect);
 			WinHttpCloseHandle(hSession);
 			return "";
@@ -232,7 +233,7 @@ void Updater::checkUpdate()
 			WINHTTP_NO_REQUEST_DATA, 0,
 			0, 0);
 		if (!bResults) {
-			MessageBoxA(NULL, "WinHttpSendRequest failed", "Error", MB_ICONEXCLAMATION | MB_OK);
+			MessageBoxA(NULL, "WinHttpSendRequest failed", "errorbl", MB_ICONEXCLAMATION | MB_OK);
 			WinHttpCloseHandle(hRequest);
 			WinHttpCloseHandle(hConnect);
 			WinHttpCloseHandle(hSession);
@@ -242,7 +243,7 @@ void Updater::checkUpdate()
 		bResults = WinHttpReceiveResponse(hRequest, NULL);
 
 		if (!bResults) {
-			MessageBoxA(NULL, "WinHttpReceiveResponse failed", "Error", MB_ICONEXCLAMATION | MB_OK);
+			MessageBoxA(NULL, "WinHttpReceiveResponse failed", "errorbl", MB_ICONEXCLAMATION | MB_OK);
 			WinHttpCloseHandle(hRequest);
 			WinHttpCloseHandle(hConnect);
 			WinHttpCloseHandle(hSession);
@@ -255,7 +256,7 @@ void Updater::checkUpdate()
 		do {
 			dwSize = 0;
 			if (!WinHttpQueryDataAvailable(hRequest, &dwSize)) {
-				MessageBoxA(NULL, "WinHttpQueryDataAvailable failed", "Error", MB_ICONEXCLAMATION | MB_OK);
+				MessageBoxA(NULL, "WinHttpQueryDataAvailable failed", "errorbl", MB_ICONEXCLAMATION | MB_OK);
 				break;
 			}
 
@@ -266,7 +267,7 @@ void Updater::checkUpdate()
 			ZeroMemory(buffer, dwSize + 1);
 
 			if (!WinHttpReadData(hRequest, (LPVOID)buffer, dwSize, &dwDownloaded)) {
-				MessageBoxA(NULL, "WinHttpReadData failed", "Error", MB_ICONEXCLAMATION | MB_OK);
+				MessageBoxA(NULL, "WinHttpReadData failed", "errorbl", MB_ICONEXCLAMATION | MB_OK);
 				delete[] buffer;
 				break;
 			}
@@ -298,7 +299,7 @@ void Updater::checkUpdate()
 			lastVersion = jsonResponse["tag_name"];
 		}
 		catch (const json::exception& e) {
-			std::cerr << "JSON parsing error: " << e.what() << std::endl;
+			std::cerr << "JSON parsing errorbl: " << e.what() << std::endl;
 		}
 	}
 
@@ -306,7 +307,7 @@ void Updater::checkUpdate()
 
 		wchar_t path[MAX_PATH];
 		if (GetModuleFileNameW(NULL, path, MAX_PATH) == 0) {
-			std::cerr << "Failed to get module file name. Error: " << GetLastError() << std::endl;
+			std::cerr << "Failed to get module file name. errorbl: " << GetLastError() << std::endl;
 			return;
 		}
 
@@ -324,14 +325,14 @@ void Updater::checkUpdate()
 		// Completion of the current process
 
 		if (!ShellExecuteExW(&sei)) {
-			DWORD dwError = GetLastError();
-			if (dwError == ERROR_CANCELLED) {
+			DWORD dwerrorbl = GetLastError();
+			if (dwerrorbl == ERROR_CANCELLED) {
 				// The user canceled the privilege escalation
-				MessageBox(NULL, "The installer was canceled by the user.", "Error", MB_OK | MB_ICONERROR);
+				MessageBox(NULL, "The installer was canceled by the user.", "errorbl", MB_OK | MB_ICONERROR);
 			}
 			else {
 				// Another mistake
-				MessageBox(NULL, "The installer could not be started.", "Error", MB_OK | MB_ICONERROR);
+				MessageBox(NULL, "The installer could not be started.", "errorbl", MB_OK | MB_ICONERROR);
 			}
 		}
 	}
