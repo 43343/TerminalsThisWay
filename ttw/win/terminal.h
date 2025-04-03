@@ -15,5 +15,5 @@ private:
 	void createProcessCMD(const std::wstring& path);
 	void createProcessCommand();
 	std::wstring currentPathTerminal;
-	std::string generateToken();
+	std::wstring generateToken();
 };

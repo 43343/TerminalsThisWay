@@ -1,12 +1,11 @@
 ﻿#include "terminal.h"
 #include <windows.h>
 #include <tlhelp32.h>
-#include <wbemidl.h>
-#include <comdef.h>
 #include <iostream>
 #include <sstream>
 #include <random>
 #include "Config/configManager.h"
+#include "Utility/utility.h"
 
 Terminal::Terminal() {}
 bool Terminal::IsProcessRunning(DWORD processID) 
@@ -73,9 +72,8 @@ void Terminal::createProcessCommand()
 		std::cout << "A terminal process is already running." << std::endl;
 		return;
 	}
-	std::string token = generateToken();
-	std::wstring wideToken(token.begin(), token.end());
-	std::wstring commandLine = L"Command.exe " + wideToken;
+	std::wstring token = generateToken();
+	std::wstring commandLine = L"Command.exe " + token;
 	STARTUPINFOW PSTARTUPINFO = { 0 };
 	PROCESS_INFORMATION PPROCESSINFO = { 0 };
 	SECURITY_ATTRIBUTES SECURITYATTR;
@@ -93,14 +91,13 @@ void Terminal::createProcessCommand()
 }
 void Terminal::sendCommandToCMD(const std::wstring& command, const bool& createCmd)
 {
-	std::cout << "govno";
 	if (createCmd)
 	{
 		createProcessCMD(ConfigManager::getInstance().getConfig().pathToTerminal);         
 	}
 	createProcessCommand();
 	const wchar_t* SHARED_MEMORY_NAME = L"TTWMemory";
-	const size_t SHARED_MEMORY_SIZE = 4000;
+	const size_t SHARED_MEMORY_SIZE = 6800;
 	HANDLE hMapFile = CreateFileMappingW(
 		INVALID_HANDLE_VALUE,
 		NULL,
@@ -123,26 +120,26 @@ void Terminal::sendCommandToCMD(const std::wstring& command, const bool& createC
 		std::cerr << "Could not map view of file: " << GetLastError() << std::endl;
 		CloseHandle(hMapFile);
 	}
-	//MessageBoxW(NULL, reinterpret_cast<wchar_t>(pBuf), L"Application already running", MB_ICONEXCLAMATION | MB_OK);
+	//MessageBoxW(NULL, L"reinterpret_cast<wchar_t>(pBuf)", L"Application already running", MB_ICONEXCLAMATION | MB_OK);
+	std::wstring data = std::to_wstring(startedProcessIDsCMD) + L"|" + command;
+	memcpy(pBuf, data.c_str(), (data.size() + 1) * sizeof(wchar_t));
 	while (wcslen(static_cast<wchar_t*>(pBuf)) > 0)
 	{
 		createProcessCommand();
 		Sleep(50);
 	}
-	std::wstring data = std::to_wstring(startedProcessIDsCMD) + L"|" + command;
-	memcpy(pBuf, data.c_str(), (data.size() + 1) * sizeof(wchar_t));
 	SetProcessWorkingSetSize(GetCurrentProcess(), -1, -1);
 }
-std::string Terminal::generateToken()
+std::wstring Terminal::generateToken()
 {
-	std::stringstream ss;
+	std::wstringstream ss;
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::uniform_int_distribution<> dis(0, 15);
 	for (int i = 0; i < 32; ++i) {
 		ss << std::hex << dis(gen);
 	}
-	std::ofstream outfile("temp.txt");
+	std::wofstream outfile(getAppdataFolder() + L"\\temp.txt");
 	if (outfile.is_open()) {
 		outfile << ss.str();
 		outfile.close();

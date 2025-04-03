@@ -1,6 +1,5 @@
 #include "updateFoundWindow.h"
 #include <iostream>
-#include <shellapi.h>
 
 UpdateFoundWindow::UpdateFoundWindow()
 {

@@ -4,6 +4,9 @@
 #include <string>
 #include <tlhelp32.h>
 #include <fstream>
+#include <aclapi.h>
+#include <codecvt>
+#include <cstdio>
 
 Application::Application(char* argv[])
 {
@@ -24,15 +27,18 @@ Application::Application(char* argv[])
 	else {
 		std::wcerr << "Failed to get executable path. Error: " << GetLastError() << std::endl;
 	}
-	if (!isValidToken(argv[1]))
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+	std::wstring token = converter.from_bytes(argv[1]);
+	//MessageBoxW(NULL, token.c_str(), L"Application already running", MB_ICONEXCLAMATION | MB_OK);
+	if (!isValidToken(token))
 	{
 		stopWorkingThread = true;
 		exit(0);
 		return;
 	}
+	//MessageBoxW(NULL, L"токен прошел", L"Application already running", MB_ICONEXCLAMATION | MB_OK);
 	SetConsoleOutputCP(65001);
 	SetConsoleCP(65001);
-	workerThread = std::thread(&Application::commandProcessingLoop, this);
 	char appDataPath[MAX_PATH];
 	if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_APPDATA, NULL, 0, appDataPath)))
 	{
@@ -41,19 +47,39 @@ Application::Application(char* argv[])
 			std::cerr << "Failed to set current directory. Error: " << GetLastError() << std::endl;
 		}
 	}
+	workerThread = std::thread(&Application::commandProcessingLoop, this);
 	readFromSharedMemory();
 }
-
-bool Application::isValidToken(const std::string& token)
+std::wstring Application::getAppdataFolder()
 {
-	std::ifstream infile("temp.txt");
+	wchar_t appDataPath[MAX_PATH];
+	if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_APPDATA, NULL, 0, appDataPath)))
+	{
+		std::wstring newFolderPath = std::wstring(appDataPath) + L"\\TerminalsThisWay";
+		if (CreateDirectoryW(newFolderPath.c_str(), NULL)) {
+			std::wcout << "The folder was created successfully: " << newFolderPath << std::endl;
+		}
+		else if (GetLastError() == ERROR_ALREADY_EXISTS) {
+			std::wcout << "The folder already exists: " << newFolderPath << std::endl;
+		}
+		else {
+			std::wcerr << "Failed to create folder: " << newFolderPath << ", ошибка: " << GetLastError() << std::endl;
+		}
+		return newFolderPath;
+	}
+}
+
+bool Application::isValidToken(const std::wstring& token)
+{
+	std::wstring filePath = getAppdataFolder() + L"\\temp.txt";
+	std::wifstream infile(filePath);
 	if (!infile.is_open()) {
 		return false;
 	}
-	std::string line;
+	std::wstring line;
 	std::getline(infile, line);
 	infile.close();
-	if (std::remove("temp.txt") == 0)
+	if (_wremove(filePath.c_str()) == 0)
 	{
 		std::cout << "The file was successfully deleted";
 	}
@@ -93,7 +119,7 @@ void Application::commandProcessingLoop()
 		std::unique_lock<std::mutex> lock(queueMutex);
 		if (commandQueue.empty()) {
 			lock.unlock();
-			Sleep(100);
+			Sleep(300);
 		      
 
 			
@@ -128,6 +154,28 @@ void Application::processNextCommand(std::wstring& command)
 		HANDLE hConsoleInput = GetStdHandle(STD_INPUT_HANDLE);
 
 		DWORD eventsWritten;
+		INPUT_RECORD clearRecords[4];
+		clearRecords[0].EventType = KEY_EVENT;
+		clearRecords[0].Event.KeyEvent.bKeyDown = TRUE;
+		clearRecords[0].Event.KeyEvent.dwControlKeyState = LEFT_CTRL_PRESSED;
+		clearRecords[0].Event.KeyEvent.uChar.UnicodeChar = 0;
+		clearRecords[0].Event.KeyEvent.wRepeatCount = 1;
+		clearRecords[0].Event.KeyEvent.wVirtualKeyCode = VK_HOME;
+		clearRecords[0].Event.KeyEvent.wVirtualScanCode = MapVirtualKey(VK_HOME, MAPVK_VK_TO_VSC);
+
+		clearRecords[1] = clearRecords[0];
+		clearRecords[1].Event.KeyEvent.bKeyDown = FALSE;
+
+		clearRecords[2].EventType = KEY_EVENT;
+		clearRecords[2].Event.KeyEvent.bKeyDown = TRUE;
+		clearRecords[2].Event.KeyEvent.dwControlKeyState = LEFT_CTRL_PRESSED;
+		clearRecords[2].Event.KeyEvent.uChar.UnicodeChar = 0;
+		clearRecords[2].Event.KeyEvent.wRepeatCount = 1;
+		clearRecords[2].Event.KeyEvent.wVirtualKeyCode = VK_END;
+		clearRecords[2].Event.KeyEvent.wVirtualScanCode = MapVirtualKey(VK_END, MAPVK_VK_TO_VSC);
+
+		clearRecords[3] = clearRecords[2];
+		clearRecords[3].Event.KeyEvent.bKeyDown = FALSE;
 
 		INPUT_RECORD inputRecords[3280];
 		size_t len = command.length();
@@ -185,6 +233,7 @@ void Application::processNextCommand(std::wstring& command)
 			return;
 		}
 		while (!isTerminalReady() && IsProcessRunning(startedProcessIDsCMD)) {
+			WriteConsoleInputW(hConsoleInput, clearRecords, 4, &eventsWritten);
 			Sleep(100);
 		}
 		if (!WriteConsoleInputW(hConsoleInput, inputRecords, currentPos, &eventsWritten)) {
@@ -200,29 +249,35 @@ bool Application::isTerminalReady() {
 	HANDLE hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hConsoleOutput == INVALID_HANDLE_VALUE) {
 		MessageBoxA(NULL, "Invalid console output handle.", "Error", MB_ICONERROR | MB_OK);
-		//stopWorkingThread = true;
 		return false;
 	}
-	WCHAR buffer[4096];
-	DWORD charsRead = 0;
-
-	COORD coord = { 0, 0 };
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	if (!GetConsoleScreenBufferInfo(hConsoleOutput, &csbi)) {
-		MessageBoxA(NULL, "GetConsoleScreenBufferInfo.", "Error", MB_ICONERROR | MB_OK);
-		//stopWorkingThread = true;
+		MessageBoxA(NULL, "GetConsoleScreenBufferInfo failed.", "Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
-	DWORD consoleSize = std::min<DWORD>(csbi.dwSize.X * csbi.dwSize.Y, 4096);
+	const DWORD bufferSize = csbi.dwSize.X * 2;
+	std::vector<WCHAR> buffer(bufferSize);
+	DWORD charsRead = 0;
 
-	if (!ReadConsoleOutputCharacterW(hConsoleOutput, buffer, consoleSize, coord, &charsRead)) {
-		MessageBoxA(NULL, "ReadConsoleOutputCharacterW.", "Error", MB_ICONERROR | MB_OK);
-		//stopWorkingThread = true;
+	COORD coord = { 0, csbi.dwCursorPosition.Y };
+	DWORD consoleSize = csbi.dwSize.X; 
+
+	if (!ReadConsoleOutputCharacterW(hConsoleOutput, buffer.data(), consoleSize, coord, &charsRead)) {
+		MessageBoxA(NULL, "ReadConsoleOutputCharacterW failed.", "Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
-	std::wstring output(buffer, charsRead);
-	return output.find(L">") != std::wstring::npos;
+
+	std::wstring output(buffer.data(), charsRead);
+
+	while (!output.empty() && (output.back() == L' ' || output.back() == L'\r' || output.back() == L'\n')) {
+		output.pop_back();
+	}
+
+	bool isReady = !output.empty() && output.back() == L'>';
+
+	return isReady;
 }
 BOOL WINAPI Application::IgnoreCtrlHandler(DWORD dwCtrlType) {
 	switch (dwCtrlType)
@@ -254,7 +309,7 @@ BOOL WINAPI Application::IgnoreCtrlHandler(DWORD dwCtrlType) {
 void Application::readFromSharedMemory()
 {
 	const wchar_t* SHARED_MEMORY_NAME = L"TTWMemory";
-	const size_t SHARED_MEMORY_SIZE = 4000;
+	const size_t SHARED_MEMORY_SIZE = 6800;
 	HANDLE hMapFile = OpenFileMappingW(
 		FILE_MAP_ALL_ACCESS,
 		FALSE,

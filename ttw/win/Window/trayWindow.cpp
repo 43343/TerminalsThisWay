@@ -1,5 +1,4 @@
 #include "trayWindow.h"
-#include <cstring>
 #include <strsafe.h>
 #include "../Config/configManager.h"
 #include "../Utility/utility.h"
@@ -141,7 +140,6 @@ LRESULT CALLBACK TrayWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 			{
 				CloseHandle(pThis->hMutex);
 				pThis->hTerminal.sendCommandToCMD(L"exit", false);
-				Sleep(1000);
 				exit(0);
 			}
 			break;
@@ -186,7 +184,6 @@ LRESULT CALLBACK TrayWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 		case ID_TRAY_EXIT:
 			pThis->hTerminal.sendCommandToCMD(L"exit", false);
 			Shell_NotifyIcon(NIM_DELETE, &nid);
-			Sleep(1000);
 			exit(0);
 			break;
 		}

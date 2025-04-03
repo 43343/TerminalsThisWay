@@ -2,10 +2,8 @@
 #include "../Config/configManager.h"
 #include <chrono>
 #include <iostream>
-#include <windowsx.h> 
 #include <shellapi.h>
 #include <shlobj.h>
-#include <commdlg.h>
 
 ParameterInputWindow* g_ParameterInputWindowInstance = nullptr;
 auto firstPressTimeParameterInput = std::chrono::steady_clock::now();

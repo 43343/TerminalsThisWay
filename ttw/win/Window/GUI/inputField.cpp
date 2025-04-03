@@ -1,7 +1,6 @@
 #include "inputField.h"
 #include <iostream>
 #include <Uxtheme.h>
-#include <Richedit.h>
 
 namespace GUI {
 	InputField::InputField(HINSTANCE hInstance, int x, int y, int width, int height, HWND parentHwnd)
@@ -23,7 +22,6 @@ namespace GUI {
 		SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 		originalWndProc = (WNDPROC)SetWindowLongPtrW(hwnd, GWLP_WNDPROC, (LONG_PTR)WindowProc);
 		SetWindowTheme(hwnd, L"Explorer", nullptr);
-		SendMessage(hwnd, EM_SETEVENTMASK, 0, ENM_CHANGE);
 	}
 	std::wstring InputField::getInput() const {
 		

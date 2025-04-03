@@ -1,7 +1,6 @@
 #include "updater.h"
 #include "../version.h"
 #include <fstream>
-#include <filesystem>
 #include "Utility/json.hpp"
 
 using json = nlohmann::json;

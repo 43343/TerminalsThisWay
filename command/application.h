@@ -11,7 +11,7 @@ public:
 	Application(char* argv[]);
 	int Run();
 private:
-	bool isValidToken(const std::string& token);
+	bool isValidToken(const std::wstring& token);
 	std::thread workerThread;
 	std::atomic<bool> stopWorkingThread = false;
 	std::mutex queueMutex;
@@ -23,5 +23,6 @@ private:
 	void processNextCommand(std::wstring& command);
 	bool IsProcessRunning(DWORD processID);
 	bool isTerminalReady();
+	std::wstring getAppdataFolder();
 	static BOOL WINAPI IgnoreCtrlHandler(DWORD dwCtrlType);
 };

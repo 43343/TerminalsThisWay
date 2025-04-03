@@ -1,7 +1,6 @@
 ﻿#include "chooseFolder.h"
 #include <iostream>
 #include <shlobj.h>
-#include <thread>
 #include "../Config/configManager.h"
 ChooseFolder* g_ChooseFolderInstance = nullptr;
 auto firstPressTimeChooseFolder = std::chrono::steady_clock::now();
