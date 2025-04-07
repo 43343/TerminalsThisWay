@@ -129,9 +129,6 @@ void Application::commandProcessingLoop()
 			}
 			lock.lock();
 		}
-		cv.wait(lock, [this]() {
-			return !commandQueue.empty() || stopWorkingThread;
-			});
 		if (!commandQueue.empty()) {
 			std::wstring nextCommand = commandQueue.front();
 			commandQueue.pop();
@@ -346,7 +343,6 @@ void Application::readFromSharedMemory()
 				commandQueue.push(command);
 				stopWorkingThread = false;
 			}
-			cv.notify_all();
 
 			std::wcout << L"Read from shared memory: Process ID = " << startedProcessIDsCMD
 				<< L", Command = " << command << std::endl;

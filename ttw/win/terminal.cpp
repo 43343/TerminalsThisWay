@@ -156,14 +156,61 @@ void Terminal::bringProcessWindowToTop() {
 	} params = { startedProcessIDsCMD, &hTargetWnd };
 
 	EnumWindows(EnumWindowsProc, reinterpret_cast<LPARAM>(&params));
-
 	if (hTargetWnd == nullptr) {
+		std::cout << "Window is not found";
 		return;
 	}
-	if (IsIconic(hTargetWnd)) {
+	WINDOWPLACEMENT wp;
+	wp.length = sizeof(WINDOWPLACEMENT);
+	GetWindowPlacement(hTargetWnd, &wp);
+
+	RECT rect;
+
+	if (wp.showCmd == SW_SHOWMINIMIZED || !GetWindowRect(hTargetWnd, &rect) || rect.right <= rect.left || rect.bottom <= rect.top) {
+		wp.showCmd = SW_RESTORE;
+		SetWindowPlacement(hTargetWnd, &wp);
+		Sleep(50);
+
+		PostMessage(hTargetWnd, WM_SYSCOMMAND, SC_RESTORE, 0);
+		Sleep(50);
+
 		ShowWindow(hTargetWnd, SW_RESTORE);
+		ShowWindow(hTargetWnd, SW_SHOWNA);
+		Sleep(50);
+
+		GetWindowPlacement(hTargetWnd, &wp);
+		GetWindowRect(hTargetWnd, &rect);
 	}
-	SetForegroundWindow(hTargetWnd);
+	if (GetForegroundWindow() != hTargetWnd) {
+		DWORD foreThread = GetWindowThreadProcessId(GetForegroundWindow(), NULL);
+		DWORD targetThread = GetWindowThreadProcessId(hTargetWnd, NULL);
+
+		if (foreThread != targetThread) {
+			AttachThreadInput(foreThread, targetThread, TRUE);
+			BringWindowToTop(hTargetWnd);
+			SetWindowPos(hTargetWnd, HWND_TOP, 0, 0, 0, 0,
+				SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+			SetForegroundWindow(hTargetWnd);
+			SetActiveWindow(hTargetWnd);
+			SetFocus(hTargetWnd);
+
+			AttachThreadInput(foreThread, targetThread, FALSE);
+		}
+		else {
+			BringWindowToTop(hTargetWnd);
+			SetWindowPos(hTargetWnd, HWND_TOP, 0, 0, 0, 0,
+				SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+			SetForegroundWindow(hTargetWnd);
+			SetActiveWindow(hTargetWnd);
+			SetFocus(hTargetWnd);
+		}
+		if (GetForegroundWindow() != hTargetWnd) {
+			keybd_event(VK_MENU, 0, 0, 0);
+			keybd_event(VK_MENU, 0, KEYEVENTF_KEYUP, 0);
+			SetForegroundWindow(hTargetWnd);
+		}
+	}
+	SetFocus(NULL);
 }
 std::wstring Terminal::generateToken()
 {
