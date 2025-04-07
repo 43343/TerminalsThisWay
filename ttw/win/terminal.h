@@ -8,6 +8,7 @@ class Terminal
 public:
 	Terminal();
 	void sendCommandToCMD(const std::wstring& command, const bool& createCmd);
+	void bringProcessWindowToTop();
 private:
 	DWORD startedProcessIDsCMD = 0;
 	DWORD startedProcessIDsCommand = 0;
@@ -16,4 +17,5 @@ private:
 	void createProcessCommand();
 	std::wstring currentPathTerminal;
 	std::wstring generateToken();
+	static BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam);
 };

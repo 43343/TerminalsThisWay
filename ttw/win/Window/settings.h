@@ -46,6 +46,9 @@ private:
     GUI::Text* chooseFolderText;
     GUI::InputKeyBind* chooseFolderInput;
 
+    GUI::Text* bringToTopText;
+    GUI::InputKeyBind* bringToTopInput;
+
     GUI::Button* saveBtn;
     GUI::Button* cancelBtn;
 

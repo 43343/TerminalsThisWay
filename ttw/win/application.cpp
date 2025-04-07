@@ -9,6 +9,7 @@
 #include "updater.h"
 #include <windows.h>
 #include "getHighlightedText.h"
+#include "bringToTop.h"
 #include <shlobj.h>
 
 HANDLE hMutex;
@@ -81,10 +82,12 @@ Application::Application(int argc, char* argv[]) {
 	std::wcout << "SendCommand: " << config.sendCommand << std::endl;
 	std::wcout << "SendCommandParameter: " << config.sendCommandParameter << std::endl;
 	std::wcout << "ChooseFolder: " << config.chooseFolder << std::endl;
+	std::wcout << "BringToTop: " << config.bringToTop << std::endl;
 	TrayWindow* trayWindow = new TrayWindow(hInstance, hMutex, cmdTerminal);
 	ChooseFolder* chooseFolder = new ChooseFolder(cmdTerminal);
 	GetHighlitedText* getText = new GetHighlitedText(cmdTerminal);
 	ParameterInputWindow* parameterInputWindow = new ParameterInputWindow(cmdTerminal);
+	BringToTop* bringToTop = new BringToTop(cmdTerminal);
 	SetProcessWorkingSetSize(GetCurrentProcess(), -1, -1);
 
 }

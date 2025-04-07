@@ -155,20 +155,20 @@ namespace GUI {
 		}
 		if (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN)
 		{
-				if (btnCount == 0) keyBind->keySequence.clear();
-				SetWindowTextW(hwnd, L"");
-				if (btnCount == 1) keyBind->keySequence += L" + ";
-				wchar_t keyName[32];
-				keyBind->GetEnglishKeyNameText(wParam, lParam, keyName, sizeof(keyName) / sizeof(wchar_t));
-				keyBind->keySequence += keyName;
-				SetWindowTextW(hwnd, keyBind->keySequence.c_str());
-				btnCount++;
-				if (btnCount == 2) simulating = false;
-				SendMessageW(hwnd, WM_SETREDRAW, TRUE, 0);
-				InvalidateRect(hwnd, NULL, FALSE);
-				if (wParam == VK_MENU) {
-					return 0;
-				}
+			if (btnCount == 0) keyBind->keySequence.clear();
+			SetWindowTextW(hwnd, L"");
+			if (btnCount == 1) keyBind->keySequence += L" + ";
+			wchar_t keyName[32];
+			keyBind->GetEnglishKeyNameText(wParam, lParam, keyName, sizeof(keyName) / sizeof(wchar_t));
+			keyBind->keySequence += keyName;
+			SetWindowTextW(hwnd, keyBind->keySequence.c_str());
+			btnCount++;
+			if (btnCount == 2) simulating = false;
+			SendMessageW(hwnd, WM_SETREDRAW, TRUE, 0);
+			InvalidateRect(hwnd, NULL, FALSE);
+			if (wParam == VK_MENU) {
+				return 0;
+			}
 		}
 		if (msg == WM_KEYUP || msg == WM_SYSKEYUP)
 		{

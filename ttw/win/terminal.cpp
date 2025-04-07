@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <random>
+#include <psapi.h>
 #include "Config/configManager.h"
 #include "Utility/utility.h"
 
@@ -130,6 +131,39 @@ void Terminal::sendCommandToCMD(const std::wstring& command, const bool& createC
 		Sleep(50);
 	}
 	SetProcessWorkingSetSize(GetCurrentProcess(), -1, -1);
+}
+BOOL CALLBACK Terminal::EnumWindowsProc(HWND hwnd, LPARAM lParam) {
+	DWORD processId = 0;
+	GetWindowThreadProcessId(hwnd, &processId);
+	struct Params {
+		DWORD targetProcessId;
+		HWND* pTargetHwnd;
+	};
+	Params* params = reinterpret_cast<Params*>(lParam);
+
+	if (processId == params->targetProcessId && IsWindowVisible(hwnd)) {
+		*(params->pTargetHwnd) = hwnd;
+		return FALSE;
+	}
+	return TRUE;
+}
+
+void Terminal::bringProcessWindowToTop() {
+	HWND hTargetWnd = nullptr;
+	struct Params {
+		DWORD targetProcessId;
+		HWND* pTargetHwnd;
+	} params = { startedProcessIDsCMD, &hTargetWnd };
+
+	EnumWindows(EnumWindowsProc, reinterpret_cast<LPARAM>(&params));
+
+	if (hTargetWnd == nullptr) {
+		return;
+	}
+	if (IsIconic(hTargetWnd)) {
+		ShowWindow(hTargetWnd, SW_RESTORE);
+	}
+	SetForegroundWindow(hTargetWnd);
 }
 std::wstring Terminal::generateToken()
 {

@@ -30,6 +30,7 @@ void ConfigManager::generateConfigFile(const std::wstring& filePath)
 		outfile << L"SendCommand=Insert\n";
 		outfile << L"SendCommandParameter=NumLock\n";
 		outfile << L"ChooseFolder=Home\n";
+		outfile << L"BringToTop=Pause\n";
 		outfile.close();
 		std::wcout << "Файл успешно создан: " << filePath << std::endl;
 	}
@@ -47,11 +48,13 @@ void ConfigManager::overwritingConfig(const std::wstring& filePath, const Config
 		outfile << L"SendCommand=" + currentConfig.sendCommand + L"\n";
 		outfile << L"SendCommandParameter=" + currentConfig.sendCommandParameter + L"\n";
 		outfile << L"ChooseFolder=" + currentConfig.chooseFolder + L"\n";
+		outfile << L"BringToTop=" + currentConfig.bringToTop + L"\n";
 		outfile.close();
 		config = currentConfig;
 		setKey(currentConfig.sendCommand, config.keySendCommand1, config.keySendCommand2);
 		setKey(currentConfig.sendCommandParameter, config.keySendCommandParameter1, config.keySendCommandParameter2);
 		setKey(currentConfig.chooseFolder, config.keyChooseFolder1, config.keyChooseFolder2);
+		setKey(currentConfig.bringToTop, config.keyBringToTop1, config.keyBringToTop2);
 		setAutoLaunch(currentConfig.launchByDefault);
 	}
 	else {
@@ -127,9 +130,14 @@ bool ConfigManager::loadFromFile(const std::wstring& filePath)
 	config.sendCommand = configMap[L"SendCommand"];
 	config.sendCommandParameter = configMap[L"SendCommandParameter"];
 	config.chooseFolder = configMap[L"ChooseFolder"];
+	config.bringToTop = configMap[L"BringToTop"];
+	if (config.bringToTop.empty()) {
+		config.bringToTop = L"Pause";
+	}
 	setKey(config.sendCommand, config.keySendCommand1, config.keySendCommand2);
 	setKey(config.sendCommandParameter, config.keySendCommandParameter1, config.keySendCommandParameter2);
 	setKey(config.chooseFolder, config.keyChooseFolder1, config.keyChooseFolder2);
+	setKey(config.bringToTop, config.keyBringToTop1, config.keyBringToTop2);
 	setAutoLaunch(config.launchByDefault);
 
 	return true;

@@ -21,6 +21,8 @@ Settings::~Settings()
 	delete sendCommandParameterInput;
 	delete chooseFolderText;
 	delete chooseFolderInput;
+	delete bringToTopText;
+	delete bringToTopInput;
 	delete saveBtn;
 	delete cancelBtn;
 }
@@ -44,7 +46,7 @@ bool Settings::createWindow() {
 		CLASS_NAME,
 		"Settings",
 		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU,
-		CW_USEDEFAULT, CW_USEDEFAULT, 580, 350,
+		CW_USEDEFAULT, CW_USEDEFAULT, 580, 380,
 		nullptr,
 		nullptr,
 		hInstance,
@@ -81,7 +83,10 @@ bool Settings::createWindow() {
 	chooseFolderText = new GUI::Text(hInstance, hwnd, 10, 240, 230, 20);
 	chooseFolderInput = new GUI::InputKeyBind(hInstance, hwnd, 325, 240, 230, 20);
 
-	saveBtn = new GUI::Button(hInstance, hwnd, 190, 290, 180, 20);
+	bringToTopText = new GUI::Text(hInstance, hwnd, 10, 270, 230, 20);
+	bringToTopInput = new GUI::InputKeyBind(hInstance, hwnd, 325, 270, 230, 20);
+
+	saveBtn = new GUI::Button(hInstance, hwnd, 190, 320, 180, 20);
 	saveBtn->setCallback([&]() {
 		Config config;
 		config.sendCommand = sendCommandInput->getText();
@@ -90,11 +95,12 @@ bool Settings::createWindow() {
 		config.launchByDefault = launchByDefaultToggle->getState();
 		config.runAsAdministrator = runAsAdministratorToggle->getState();
 		config.pathToTerminal = pathToTerminalInput->getInput();
+		config.bringToTop = bringToTopInput->getText();
 		ConfigManager::getInstance().overwritingConfig(getAppdataFolder() + L"\\config.conf", config);
 		DestroyWindow(hwnd);
 		UnregisterClass(CLASS_NAME, GetModuleHandle(NULL));
 		});
-	cancelBtn = new GUI::Button(hInstance, hwnd, 380, 290, 180, 20);
+	cancelBtn = new GUI::Button(hInstance, hwnd, 380, 320, 180, 20);
 	cancelBtn->setCallback([&]() {
 		DestroyWindow(hwnd);
 		UnregisterClass(CLASS_NAME, GetModuleHandle(NULL));
@@ -115,6 +121,7 @@ void Settings::setText() {
 	sendCommandText->setText("Send command:");
 	sendCommandParameterText->setText("Send command (Change parameter):");
 	chooseFolderText->setText("Choose folder:");
+	bringToTopText->setText("Bring to top:");
 	saveBtn->setText("Save");
 	cancelBtn->setText("Cancel");
 	InvalidateRect(hwnd, NULL, TRUE);
@@ -128,6 +135,7 @@ void Settings::setInput() {
 	sendCommandInput->setText(ConfigManager::getInstance().getConfig().sendCommand);
 	sendCommandParameterInput->setText(ConfigManager::getInstance().getConfig().sendCommandParameter);
 	chooseFolderInput->setText(ConfigManager::getInstance().getConfig().chooseFolder);
+	bringToTopInput->setText(ConfigManager::getInstance().getConfig().bringToTop);
 	InvalidateRect(hwnd, NULL, TRUE);
 	UpdateWindow(hwnd);
 }
@@ -165,6 +173,7 @@ LRESULT CALLBACK Settings::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 		pThis->sendCommandInput->HandleParentClick(pt);
 		pThis->sendCommandParameterInput->HandleParentClick(pt);
 		pThis->chooseFolderInput->HandleParentClick(pt);
+		pThis->bringToTopInput->HandleParentClick(pt);
 		SetFocus(NULL);
 		break;
 	case WM_DESTROY:

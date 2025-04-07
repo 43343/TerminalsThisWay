@@ -48,6 +48,8 @@ set(SourcesWin
     win/getText.h
     win/getHighlightedText.cpp
     win/getHighlightedText.h
+    win/bringToTop.cpp
+    win/bringToTop.h
     win/Window/chooseFolder.cpp
     win/Window/chooseFolder.h
     win/terminal.cpp
