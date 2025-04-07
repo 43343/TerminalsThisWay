@@ -119,7 +119,7 @@ void Application::commandProcessingLoop()
 		std::unique_lock<std::mutex> lock(queueMutex);
 		if (commandQueue.empty()) {
 			lock.unlock();
-			Sleep(300);
+			Sleep(200);
 		      
 
 			

@@ -1,18 +1,21 @@
 ﻿#include "inputKeyBind.h"
 #include <iostream>
+#include <Uxtheme.h>
 #include "../../Utility/utility.h"
 
 namespace GUI {
 	InputKeyBind::InputKeyBind(HINSTANCE hInstance, HWND parentHwnd, int x, int y, int width, int height) : parentHwnd(parentHwnd) {
 
 		hwnd = CreateWindowExW(
-			0, L"EDIT",
+			WS_EX_COMPOSITED | WS_EX_TRANSPARENT, L"EDIT",
 			L"",
-			WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | ES_READONLY,
+			WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | ES_READONLY | WS_CLIPCHILDREN,
 			x, y, width, height,
 			parentHwnd, nullptr, hInstance, nullptr);
+		SendMessageW(hwnd, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELPARAM(2, 2));
 		SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 		originalWndProc = (WNDPROC)SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)WindowProc);
+		SetWindowTheme(hwnd, L"Explorer", nullptr);
 	}
 
 	void InputKeyBind::HandleParentClick(POINT pt) {
@@ -111,46 +114,76 @@ namespace GUI {
 		InputKeyBind* keyBind = reinterpret_cast<InputKeyBind*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
 
 		static int btnCount = 0;
+		static bool simulating = false;
 
 		DWORD vkCode = static_cast<DWORD>(wParam);
+		if (msg == WM_PAINT)
+		{
+			PAINTSTRUCT ps;
+			HDC hdc = BeginPaint(hwnd, &ps);
+
+			RECT rc;
+			GetClientRect(hwnd, &rc);
+			HDC hdcMem = CreateCompatibleDC(hdc);
+			HBITMAP hbmMem = CreateCompatibleBitmap(hdc, rc.right, rc.bottom);
+			HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, hbmMem);
+
+			FillRect(hdcMem, &rc, (HBRUSH)(COLOR_WINDOW + 1));
+			CallWindowProc(keyBind->originalWndProc, hwnd, WM_PRINT, (WPARAM)hdcMem,
+				PRF_CLIENT | PRF_NONCLIENT);
+
+			BitBlt(hdc, 0, 0, rc.right, rc.bottom, hdcMem, 0, 0, SRCCOPY);
+
+			SelectObject(hdcMem, hbmOld);
+			DeleteObject(hbmMem);
+			DeleteDC(hdcMem);
+			EndPaint(hwnd, &ps);
+			return 0;
+		}
 		if (msg == WM_SETFOCUS)
 		{
 			Simulating::SetSimulating(true);
+			simulating = true;
 		}
 		if (msg == WM_KILLFOCUS)
 		{
-			Simulating::SetSimulating(false);
-			SetWindowTextW(hwnd, L"");
-			InvalidateRect(keyBind->parentHwnd, NULL, TRUE);
-			UpdateWindow(keyBind->parentHwnd);
+			simulating = false;
+			SendMessageW(hwnd, WM_SETREDRAW, FALSE, 0);
 			SetWindowTextW(hwnd, keyBind->keySequence.c_str());
+			SendMessageW(hwnd, WM_SETREDRAW, TRUE, 0);
+			InvalidateRect(hwnd, NULL, FALSE);
 		}
 		if (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN)
 		{
-			if (btnCount == 0) keyBind->keySequence.clear();                       
-			SetWindowTextW(hwnd, L"");
-			InvalidateRect(keyBind->parentHwnd, NULL, TRUE);
-			UpdateWindow(keyBind->parentHwnd);
-			if (btnCount == 1) keyBind->keySequence += L" + ";    
-			wchar_t keyName[32];
-			keyBind->GetEnglishKeyNameText(wParam, lParam, keyName, sizeof(keyName) / sizeof(wchar_t));
-			std::wcout << "keyAher:" << keyName;
-			keyBind->keySequence += keyName;
-			std::wcout << L"YES\n";
-			SetWindowTextW(hwnd, keyBind->keySequence.c_str());
-			btnCount++;
-			if (btnCount == 2) SetFocus(NULL);
-			if (wParam == VK_MENU) {
-				return 0;
+				if (btnCount == 0) keyBind->keySequence.clear();
+				SetWindowTextW(hwnd, L"");
+				if (btnCount == 1) keyBind->keySequence += L" + ";
+				wchar_t keyName[32];
+				keyBind->GetEnglishKeyNameText(wParam, lParam, keyName, sizeof(keyName) / sizeof(wchar_t));
+				keyBind->keySequence += keyName;
+				SetWindowTextW(hwnd, keyBind->keySequence.c_str());
+				btnCount++;
+				if (btnCount == 2) simulating = false;
+				SendMessageW(hwnd, WM_SETREDRAW, TRUE, 0);
+				InvalidateRect(hwnd, NULL, FALSE);
+				if (wParam == VK_MENU) {
+					return 0;
+				}
+		}
+		if (msg == WM_KEYUP || msg == WM_SYSKEYUP)
+		{
+			if (!simulating)
+			{
+				SetFocus(NULL);
+				Simulating::SetSimulating(false);
 			}
 		}
 		if (msg == WM_LBUTTONUP)
 		{
-			SetWindowTextW(hwnd, L"");
-			InvalidateRect(keyBind->parentHwnd, NULL, TRUE);
-			UpdateWindow(keyBind->parentHwnd);
-			std::cout << "LBUTTON";
+			SendMessageW(hwnd, WM_SETREDRAW, FALSE, 0);
 			SetWindowTextW(hwnd, L"Press the key");
+			SendMessageW(hwnd, WM_SETREDRAW, TRUE, 0);
+			InvalidateRect(hwnd, NULL, FALSE);
 			btnCount = 0;
 		}
 		return CallWindowProc(keyBind->originalWndProc, hwnd, msg, wParam, lParam);

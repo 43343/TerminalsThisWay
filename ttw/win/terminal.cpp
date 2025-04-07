@@ -93,7 +93,8 @@ void Terminal::sendCommandToCMD(const std::wstring& command, const bool& createC
 {
 	if (createCmd)
 	{
-		createProcessCMD(ConfigManager::getInstance().getConfig().pathToTerminal);         
+		createProcessCMD(ConfigManager::getInstance().getConfig().pathToTerminal);
+		Sleep(100);
 	}
 	createProcessCommand();
 	const wchar_t* SHARED_MEMORY_NAME = L"TTWMemory";
