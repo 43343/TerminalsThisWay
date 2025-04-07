@@ -38,6 +38,7 @@ namespace GUI {
 
 			InvalidateRect(GetParent(hwnd), &clientRect, FALSE);
 			UpdateWindow(GetParent(hwnd));
+			Simulating::SetSimulating(false);
 		}
 	}
 
