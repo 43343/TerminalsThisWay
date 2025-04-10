@@ -327,6 +327,18 @@ LRESULT CALLBACK ParameterInputWindow::LowLevelKeyboardProc(int nCode, WPARAM wP
 				{
 					g_ParameterInputWindowInstance->CreateInputWindow();
 				}
+				else
+				{
+					POINT p;
+					GetCursorPos(&p);
+					int width = 300;
+					int height = 20;
+					RECT screenRect;
+					GetWindowRect(GetDesktopWindow(), &screenRect);
+					if (p.x + width > screenRect.right) p.x = screenRect.right - width;
+					if (p.y + height > screenRect.bottom) p.y = screenRect.bottom - height;
+					SetWindowPos(g_ParameterInputWindowInstance->hwnd, HWND_TOPMOST, p.x, p.y, width, height, SWP_NOSIZE | SWP_NOACTIVATE);
+				}
 			}
 		}
 		else
@@ -347,6 +359,18 @@ LRESULT CALLBACK ParameterInputWindow::LowLevelKeyboardProc(int nCode, WPARAM wP
 							if (!g_ParameterInputWindowInstance->isDialogOpen)
 							{
 								g_ParameterInputWindowInstance->CreateInputWindow();
+							}
+							else
+							{
+								POINT p;
+								GetCursorPos(&p);
+								int width = 300;
+								int height = 20;
+								RECT screenRect;
+								GetWindowRect(GetDesktopWindow(), &screenRect);
+								if (p.x + width > screenRect.right) p.x = screenRect.right - width;
+								if (p.y + height > screenRect.bottom) p.y = screenRect.bottom - height;
+								SetWindowPos(g_ParameterInputWindowInstance->hwnd, HWND_TOPMOST, p.x, p.y, width, height, SWP_NOSIZE | SWP_NOACTIVATE);
 							}
 						}
 						else {
@@ -375,10 +399,21 @@ LRESULT CALLBACK ParameterInputWindow::LowLevelKeyboardProc(int nCode, WPARAM wP
 				}
 
 				if (g_ParameterInputWindowInstance->keyA_pressed && g_ParameterInputWindowInstance->keyB_pressed) {
-					std::cout << "gParameter1 " << g_ParameterInputWindowInstance->keyA_pressed << " gParameter2 " << g_ParameterInputWindowInstance->keyB_pressed;
 					if (!g_ParameterInputWindowInstance->isDialogOpen)
 					{
 						g_ParameterInputWindowInstance->CreateInputWindow();;
+					}
+					else
+					{
+						POINT p;
+						GetCursorPos(&p);
+						int width = 300;
+						int height = 20;
+						RECT screenRect;
+						GetWindowRect(GetDesktopWindow(), &screenRect);
+						if (p.x + width > screenRect.right) p.x = screenRect.right - width;
+						if (p.y + height > screenRect.bottom) p.y = screenRect.bottom - height;
+						SetWindowPos(g_ParameterInputWindowInstance->hwnd, HWND_TOPMOST, p.x, p.y, width, height, SWP_NOSIZE | SWP_NOACTIVATE);
 					}
 				}
 			}

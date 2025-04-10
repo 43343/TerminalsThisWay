@@ -11,15 +11,19 @@ public:
 	Application(char* argv[]);
 	int Run();
 private:
+	struct CommandParam
+	{
+		int startedProcessIDsCMD;
+		std::wstring command;
+	};
 	bool isValidToken(const std::wstring& token);
 	std::thread workerThread;
 	std::atomic<bool> stopWorkingThread = false;
 	std::mutex queueMutex;
-	std::queue<std::wstring> commandQueue;
-	int startedProcessIDsCMD = 0;
+	std::queue<CommandParam> commandQueue;
 	void commandProcessingLoop();
 	void readFromSharedMemory();
-	void processNextCommand(std::wstring& command);
+	void processNextCommand(CommandParam& commandParam);
 	bool IsProcessRunning(DWORD processID);
 	bool isTerminalReady();
 	std::wstring getAppdataFolder();

@@ -134,7 +134,7 @@ void Application::commandProcessingLoop()
 			lock.lock();
 		}
 		if (!commandQueue.empty()) {
-			std::wstring nextCommand = commandQueue.front();
+			CommandParam nextCommand = commandQueue.front();
 			commandQueue.pop();
 			lock.unlock(); 
 
@@ -144,11 +144,11 @@ void Application::commandProcessingLoop()
 		}
 	}
 }
-void Application::processNextCommand(std::wstring& command)
+void Application::processNextCommand(CommandParam& commandParam)
 {
-	if (IsProcessRunning(startedProcessIDsCMD) && startedProcessIDsCMD != 0) {
+	if (IsProcessRunning(commandParam.startedProcessIDsCMD) && commandParam.startedProcessIDsCMD != 0) {
 		FreeConsole();
-		if (!AttachConsole(startedProcessIDsCMD)) {
+		if (!AttachConsole(commandParam.startedProcessIDsCMD)) {
 			MessageBoxA(NULL, "Couldn't connect to the terminal.", "Error", MB_ICONERROR | MB_OK);
 			return;
 		}
@@ -179,7 +179,7 @@ void Application::processNextCommand(std::wstring& command)
 		clearRecords[3].Event.KeyEvent.bKeyDown = FALSE;
 
 		INPUT_RECORD inputRecords[3280];
-		size_t len = command.length();
+		size_t len = commandParam.command.length();
 		size_t currentPos = 0;
 
 		inputRecords[currentPos].EventType = KEY_EVENT;
@@ -211,7 +211,7 @@ void Application::processNextCommand(std::wstring& command)
 			inputRecords[currentPos].EventType = KEY_EVENT;
 			inputRecords[currentPos].Event.KeyEvent.bKeyDown = TRUE;
 			inputRecords[currentPos].Event.KeyEvent.dwControlKeyState = 0;
-			inputRecords[currentPos].Event.KeyEvent.uChar.UnicodeChar = command[i];
+			inputRecords[currentPos].Event.KeyEvent.uChar.UnicodeChar = commandParam.command[i];
 			inputRecords[currentPos].Event.KeyEvent.wRepeatCount = 1;
 			inputRecords[currentPos].Event.KeyEvent.wVirtualKeyCode = 0;
 			inputRecords[currentPos].Event.KeyEvent.wVirtualScanCode = 0;
@@ -233,7 +233,7 @@ void Application::processNextCommand(std::wstring& command)
 			MessageBoxA(NULL, "Failed to set control handler.", "Error", MB_ICONERROR | MB_OK);
 			return;
 		}
-		while (!isTerminalReady() && IsProcessRunning(startedProcessIDsCMD)) {
+		while (!isTerminalReady() && IsProcessRunning(commandParam.startedProcessIDsCMD)) {
 			WriteConsoleInputW(hConsoleInput, clearRecords, 4, &eventsWritten);
 			Sleep(100);
 		}
@@ -241,9 +241,20 @@ void Application::processNextCommand(std::wstring& command)
 
 			std::cerr << "Failed to write to console input buffer." << std::endl;
 		}
-		if (!IsProcessRunning(startedProcessIDsCMD)) {
-			commandQueue = {};
+	}
+	if (!IsProcessRunning(commandParam.startedProcessIDsCMD)) {
+		std::queue<CommandParam> newQueue;
+
+		while (!commandQueue.empty()) {
+			CommandParam item = commandQueue.front();
+			commandQueue.pop();
+
+			if (item.startedProcessIDsCMD != commandParam.startedProcessIDsCMD) {
+				newQueue.push(item);
+			}
 		}
+
+		commandQueue = std::move(newQueue);
 	}
 }
 bool Application::isTerminalReady() {
@@ -339,17 +350,15 @@ void Application::readFromSharedMemory()
 		size_t delimiterPos = data.find(L'|');
 		if (delimiterPos != std::wstring::npos) {
 			std::wstring processIDStr = data.substr(0, delimiterPos);
-			startedProcessIDsCMD = std::stoi(processIDStr);
+			CommandParam commandParam;
+			commandParam.startedProcessIDsCMD = std::stoi(processIDStr);
 
-			std::wstring command = data.substr(delimiterPos + 1);
+			commandParam.command = data.substr(delimiterPos + 1);
 			{
 				std::lock_guard<std::mutex> lock(queueMutex);
-				commandQueue.push(command);
+				commandQueue.push(commandParam);
 				stopWorkingThread = false;
 			}
-
-			std::wcout << L"Read from shared memory: Process ID = " << startedProcessIDsCMD
-				<< L", Command = " << command << std::endl;
 		}
 		else
 		{
