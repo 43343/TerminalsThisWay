@@ -304,4 +304,5 @@ std::wstring getAppdataFolder()
 		}
 		return newFolderPath;
 	}
+	return L"";
 }

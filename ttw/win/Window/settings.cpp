@@ -167,13 +167,6 @@ LRESULT CALLBACK Settings::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 		}
 		break;
 	case WM_LBUTTONDOWN:
-		POINT pt;
-		pt.x = LOWORD(lParam);
-		pt.y = HIWORD(lParam);
-		pThis->sendCommandInput->HandleParentClick(pt);
-		pThis->sendCommandParameterInput->HandleParentClick(pt);
-		pThis->chooseFolderInput->HandleParentClick(pt);
-		pThis->bringToTopInput->HandleParentClick(pt);
 		SetFocus(NULL);
 		break;
 	case WM_DESTROY:

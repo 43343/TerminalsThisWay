@@ -7,7 +7,6 @@ namespace GUI {
 	class InputKeyBind : private Simulating {
 	public:
 		InputKeyBind(HINSTANCE hInstance, HWND parentHwnd, int x, int y, int width, int height);
-		void HandleParentClick(POINT pt);
 		void setText(std::wstring text);
 		std::wstring getText();
 		

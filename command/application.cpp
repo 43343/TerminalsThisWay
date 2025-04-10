@@ -7,6 +7,9 @@
 #include <aclapi.h>
 #include <codecvt>
 #include <cstdio>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 Application::Application(char* argv[])
 {
@@ -67,12 +70,13 @@ std::wstring Application::getAppdataFolder()
 		}
 		return newFolderPath;
 	}
+	return L"";
 }
 
 bool Application::isValidToken(const std::wstring& token)
 {
-	std::wstring filePath = getAppdataFolder() + L"\\temp.txt";
-	std::wifstream infile(filePath);
+	fs::path filePath = getAppdataFolder() + L"\\temp.txt";
+	std::wifstream infile{ filePath };
 	if (!infile.is_open()) {
 		return false;
 	}

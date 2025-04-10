@@ -18,29 +18,6 @@ namespace GUI {
 		SetWindowTheme(hwnd, L"Explorer", nullptr);
 	}
 
-	void InputKeyBind::HandleParentClick(POINT pt) {
-		RECT rect;
-		GetWindowRect(hwnd, &rect);
-
-		POINT ptLeft = { rect.left, rect.top };
-		POINT ptRight = { rect.right, rect.bottom };
-
-		ScreenToClient(GetParent(hwnd), &ptLeft);
-		ScreenToClient(GetParent(hwnd), &ptRight);
-
-		RECT clientRect = { ptLeft.x, ptLeft.y, ptRight.x, ptRight.y };
-
-		if (!PtInRect(&clientRect, pt)) {
-			SendMessageW(hwnd, WM_SETREDRAW, FALSE, 0);
-			SetWindowTextW(hwnd, L"");
-			SetWindowTextW(hwnd, keySequence.c_str());
-			SendMessageW(hwnd, WM_SETREDRAW, TRUE, 0);
-
-			InvalidateRect(GetParent(hwnd), &clientRect, FALSE);
-			UpdateWindow(GetParent(hwnd));
-		}
-	}
-
 	void InputKeyBind::setText(std::wstring text) {
 		keySequence = text;
 		SendMessageW(hwnd, WM_SETREDRAW, FALSE, 0);

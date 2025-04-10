@@ -5,8 +5,11 @@
 #include <sstream>
 #include <random>
 #include <psapi.h>
+#include <filesystem>
 #include "Config/configManager.h"
 #include "Utility/utility.h"
+
+namespace fs = std::filesystem;
 
 Terminal::Terminal() {}
 bool Terminal::IsProcessRunning(DWORD processID) 
@@ -65,7 +68,7 @@ void Terminal::createProcessCMD(const std::wstring& path)
 		&PPROCESSINFO);
 
 	startedProcessIDsCMD = PPROCESSINFO.dwProcessId;
-	WaitForSingleObject(PPROCESSINFO.hProcess, 1000);
+	WaitForSingleObject(PPROCESSINFO.hProcess, 2000);
 }
 void Terminal::createProcessCommand()
 {
@@ -95,7 +98,6 @@ void Terminal::sendCommandToCMD(const std::wstring& command, const bool& createC
 	if (createCmd)
 	{
 		createProcessCMD(ConfigManager::getInstance().getConfig().pathToTerminal);
-		Sleep(100);
 	}
 	createProcessCommand();
 	const wchar_t* SHARED_MEMORY_NAME = L"TTWMemory";
@@ -221,7 +223,7 @@ std::wstring Terminal::generateToken()
 	for (int i = 0; i < 32; ++i) {
 		ss << std::hex << dis(gen);
 	}
-	std::wofstream outfile(getAppdataFolder() + L"\\temp.txt");
+	std::wofstream outfile{ fs::path(getAppdataFolder() + L"\\temp.txt") };
 	if (outfile.is_open()) {
 		outfile << ss.str();
 		outfile.close();
