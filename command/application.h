@@ -4,6 +4,7 @@
 #include <mutex>
 #include <queue>
 #include <condition_variable>
+#include <string>
 
 class Application
 {
